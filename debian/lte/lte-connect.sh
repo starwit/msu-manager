@@ -191,18 +191,18 @@ set_up_network_interface() {
     echo "Using bearer with ID $bearer_id"
     mmcli -b $bearer_id
 
-    local BEARER_IP=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".address' )
-    local BEARER_GW=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".gateway' )
-    local BEARER_IP_PREFIX=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".prefix' )
-    local BEARER_DNS=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".dns | join (" ")' )
+    local bearer_ip=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".address' )
+    local bearer_gw=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".gateway' )
+    local bearer_ip_prefix=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".prefix' )
+    local bearer_dns=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".dns | join (" ")' )
 
     echo "Using IP info from bearer:"
-    echo "BEARER_IP: $BEARER_IP"
-    echo "BEARER_GW: $BEARER_GW"
-    echo "BEARER_IP_PREFIX: $BEARER_IP_PREFIX"
-    echo "BEARER_DNS: $BEARER_DNS"
+    echo "BEARER_IP: $bearer_ip"
+    echo "BEARER_GW: $bearer_gw"
+    echo "BEARER_IP_PREFIX: $bearer_ip_prefix"
+    echo "BEARER_DNS: $bearer_dns"
 
-    if [[ -z "$BEARER_IP" || -z "$BEARER_GW" || -z "$BEARER_IP_PREFIX" || -z "$BEARER_DNS" ]]; then
+    if [[ -z "$bearer_ip" || -z "$bearer_gw" || -z "$bearer_ip_prefix" || -z "$bearer_dns" ]]; then
         echo "No valid IP info — aborting. ❌"
         return 1
     fi
@@ -212,13 +212,13 @@ set_up_network_interface() {
     # Configure interface
     ip addr flush dev $WWAN_IFACE
     ip link set $WWAN_IFACE up
-    ip addr add $BEARER_IP/$BEARER_IP_PREFIX dev $WWAN_IFACE
+    ip addr add $bearer_ip/$bearer_ip_prefix dev $WWAN_IFACE
 
     echo "Setting DNS servers"
-    resolvectl dns $WWAN_IFACE $BEARER_DNS
+    resolvectl dns $WWAN_IFACE $bearer_dns
 
     echo "Setting default IP route"
-    ip route add default via $BEARER_GW metric 500
+    ip route add default via $bearer_gw metric 500
 
     echo "Network interface configuration done"
 
