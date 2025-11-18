@@ -37,7 +37,7 @@ main() {
         exit 0
     fi
 
-    echo "simple-connect failed, resetting modem"
+    echo "Simple-connect failed, resetting modem"
     reset_modem
     if ! wait_for_modem_reset; then
         echo "Reset failed"
@@ -66,10 +66,10 @@ main() {
 check_connection() {
     echo "Checking connection on $WWAN_IFACE"
     if ping -c 3 -w 1 -i 0.2 -I $WWAN_IFACE 1.1.1.1 >/dev/null; then
-        echo "✅ Connection check successful!"
+        echo "Connection check successful! ✅"
         return 0
     else
-        echo "❌ Connection check failed!"
+        echo "Connection check failed! ❌"
         return 1
     fi
 }
@@ -122,7 +122,7 @@ wait_for_modem_connected() {
         local state=$(get_modem_state)
         echo "Current modem state: $state"
         if [ "$state" == "connected" ]; then
-            echo "✅ Modem is registered to network."
+            echo "Modem is registered to network. ✅"
             return 0
         fi
         sleep 2
@@ -200,7 +200,7 @@ set_up_network_interface() {
     echo "BEARER_DNS: $BEARER_DNS"
 
     if [[ -z "$BEARER_IP" || -z "$BEARER_GW" || -z "$BEARER_IP_PREFIX" || -z "$BEARER_DNS" ]]; then
-        echo "❌ No valid IP info — aborting."
+        echo "No valid IP info — aborting. ❌"
         return 1
     fi
 
