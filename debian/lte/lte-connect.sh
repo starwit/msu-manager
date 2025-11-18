@@ -41,16 +41,19 @@ main() {
     reset_modem
     if ! wait_for_modem_reset; then
         echo "Reset failed"
+        mmcli -m any
         exit 1
     fi
     
     if ! wait_for_modem_hardware; then
         echo "Modem failed to register with the OS"
+        mmcli -m any
         exit 1
     fi
 
     if ! wait_for_modem_ready; then
         echo "Modem failed to get ready"
+        mmcli -m any
         exit 1
     fi
 
@@ -59,6 +62,7 @@ main() {
         exit 0
     else
         echo "Connection finally failed, exiting"
+        mmcli -m any
         exit 1
     fi
 }
