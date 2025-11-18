@@ -158,7 +158,7 @@ get_modem_state() {
 }
 
 get_modem_at_port() {
-    # We need to use the secondary at port if there are multple, because the first one is often already in use
+    # We need to use the secondary at port if there are multiple, because the first one is often already in use
     local device_name=$(mmcli -m any -J | jq -r '[.modem.generic.ports[] | select(contains("at"))] | sort | .[-1]' | grep -Po '^\w+')
     echo "/dev/$device_name"
 }
