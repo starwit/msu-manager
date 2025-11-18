@@ -165,6 +165,9 @@ get_modem_at_port() {
 
 connect_bearer() {
     local modem_id=$(get_modem_id)
+    echo "Making sure modem $modem_id in enabled"
+    mmcli -m $modem_id -e
+
     echo "Connecting to APN $APN on modem $modem_id..."
     if ! mmcli -m $modem_id --simple-connect="apn=$APN,ip-type=ipv4,allow-roaming=true"; then
         echo "Failed to connect modem"
