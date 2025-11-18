@@ -179,19 +179,22 @@ connect_bearer() {
 set_up_network_interface() {
     echo "Setting up network interface"
 
+    # Fetch modem info
     local modem_id=$(get_modem_id)
+
     echo "Using modem with ID $modem_id"
+    mmcli -m $modem_id
 
     # Fetch bearer info
-    local BEARER_ID=$( mmcli -m $modem_id -J | jq -r '.modem.generic.bearers[0]' | grep -Po '\d+$' )
+    local bearer_id=$( mmcli -m $modem_id -J | jq -r '.modem.generic.bearers[0]' | grep -Po '\d+$' )
 
-    echo "Using bearer with ID $BEARER_ID"
-    mmcli -b $BEARER_ID
+    echo "Using bearer with ID $bearer_id"
+    mmcli -b $bearer_id
 
-    local BEARER_IP=$( mmcli -b $BEARER_ID -J | jq -r '.bearer."ipv4-config".address' )
-    local BEARER_GW=$( mmcli -b $BEARER_ID -J | jq -r '.bearer."ipv4-config".gateway' )
-    local BEARER_IP_PREFIX=$( mmcli -b $BEARER_ID -J | jq -r '.bearer."ipv4-config".prefix' )
-    local BEARER_DNS=$( mmcli -b $BEARER_ID -J | jq -r '.bearer."ipv4-config".dns | join (" ")' )
+    local BEARER_IP=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".address' )
+    local BEARER_GW=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".gateway' )
+    local BEARER_IP_PREFIX=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".prefix' )
+    local BEARER_DNS=$( mmcli -b $bearer_id -J | jq -r '.bearer."ipv4-config".dns | join (" ")' )
 
     echo "Using IP info from bearer:"
     echo "BEARER_IP: $BEARER_IP"
