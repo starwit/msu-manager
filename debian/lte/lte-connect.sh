@@ -6,8 +6,8 @@ set -o pipefail
 # WWAN_IFACE="wwan0"
 
 # Read configuration parameters from command line arguments or environment variables
-readonly APN=${2:-$APN}
-readonly WWAN_IFACE=${3:-$WWAN_IFACE}
+readonly APN=${1:-$APN}
+readonly WWAN_IFACE=${2:-$WWAN_IFACE}
 
 # Exit if not all parameters are set
 if [[ -z "$APN" || -z "$WWAN_IFACE" ]]; then
