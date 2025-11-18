@@ -80,4 +80,11 @@ class UplinkMonitor:
         stdout, stderr = await proc.communicate()
         stdout = stdout.decode() if stdout else ''
         stderr = stderr.decode() if stderr else ''
+
+        logger.debug(f'Debug output of {" ".join(command)}, env: {env}')
+        logger.debug(f"STDOUT:")
+        logger.debug(f"{stdout}")
+        logger.debug(f"STDERR:")
+        logger.debug(f"{stderr}")
+
         return proc.returncode, stdout, stderr
