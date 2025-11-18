@@ -19,7 +19,6 @@ class UplinkMonitorConfig(BaseModel):
     enabled: Literal[True]
     restore_connection_cmd: List[str]
     wwan_device: str
-    wwan_usb_id: str
     wwan_apn: str
     check_connection_target: str
     check_connection_device: str = None

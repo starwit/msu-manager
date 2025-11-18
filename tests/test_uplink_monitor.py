@@ -13,7 +13,6 @@ def uplink_monitor():
             enabled=True,
             restore_connection_cmd=['./restore'],
             wwan_device='test_wwan',
-            wwan_usb_id='1234:5678',
             wwan_apn='test_apn',
             check_connection_target='8.8.8.8',
             check_interval_s=5
@@ -99,4 +98,4 @@ async def test_run_connection_down_restore_success(uplink_monitor, monkeypatch):
     ] == [call.args[0] for call in mock_subprocess.mock_calls]
 
     # Verify that restore command was called with correct env (>= means "is superset of")
-    assert mock_subprocess.mock_calls[1].kwargs['env'].items() >= {'WWAN_IFACE': 'test_wwan', 'DEVICE_ID': '1234:5678', 'APN': 'test_apn'}.items()
+    assert mock_subprocess.mock_calls[1].kwargs['env'].items() >= {'WWAN_IFACE': 'test_wwan', 'APN': 'test_apn'}.items()

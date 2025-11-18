@@ -13,7 +13,6 @@ class UplinkMonitor:
         self._restore_connection_cmd = config.restore_connection_cmd
         self._restore_connection_env = {
             'WWAN_IFACE': config.wwan_device,
-            'DEVICE_ID': config.wwan_usb_id,
             'APN': config.wwan_apn,
         }
         self._check_connection_cmd = [
