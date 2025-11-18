@@ -2,20 +2,17 @@
 
 set -o pipefail
 
-# Use lsusb to find the device id ("vendor:product")
-# DEVICE_ID="1bbb:00b6"
 # APN="internet.telekom"
 # WWAN_IFACE="wwan0"
 
 # Read configuration parameters from command line arguments or environment variables
-readonly DEVICE_ID=${1:-$DEVICE_ID}
 readonly APN=${2:-$APN}
 readonly WWAN_IFACE=${3:-$WWAN_IFACE}
 
 # Exit if not all parameters are set
-if [[ -z "$DEVICE_ID" || -z "$APN" || -z "$WWAN_IFACE" ]]; then
-    echo "Usage: $0 <device_id> <apn> <wwan_iface>"
-    echo "Or set DEVICE_ID, APN, and WWAN_IFACE environment variables."
+if [[ -z "$APN" || -z "$WWAN_IFACE" ]]; then
+    echo "Usage: $0 <apn> <wwan_iface>"
+    echo "Or set APN, and WWAN_IFACE environment variables."
     exit 1
 fi
 
