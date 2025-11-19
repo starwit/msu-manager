@@ -1,13 +1,18 @@
 # Power Toggle Service User's Manual
 In this document, you'll find all information to run and to use MSU-Manager.
 
+## Deployment
+The following diagram shows a typical setup in conjunction with [Starwit's Awareness Engine](https://github.com/starwit/starwit-awareness-engine). MSU Manager is installed on a Linux computer that is used in an embedded scenario. Most important interaction happens with [Hardware Control Unit](https://github.com/starwit/msu-controller) which is a micro-controller based software, that turns embedded Linux computer on/off.
+
+![](./img/deployment.drawio.svg)
+
 ## App Configuration
 
 After installation config file of service is located at /etc/msu-manager/settings.yaml. Refer to the [settings template](../settings.template.yaml) for an example.
 
 ## OS Configuration
 _This should have been set up by the installation script._
-In order to allow service to execute shutdown command without password prompt using sudo, you need to add following line to sudoers file. You can add and edit a sudoers file using visudo command.
+On Linux privilege to shutdown or reboot a computer is restricted (and for good reasons!). So it is necessary to provide a root-like access to shutdown for this service. In order to limit exposure of root privileges MSU Manager can only use shutdown. Here is an explanation, what APT install script is doing:
 
 If you want to create the sudo policy manually, please refer to the [postinst script](../debian/preinst). \
 Then use `sudo visudo -f /etc/sudoers.d/msu-manager` to create / edit the file.
