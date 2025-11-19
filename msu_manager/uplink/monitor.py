@@ -13,7 +13,6 @@ class UplinkMonitor:
         self._restore_connection_cmd = config.restore_connection_cmd
         self._restore_connection_env = {
             'WWAN_IFACE': config.wwan_device,
-            'DEVICE_ID': config.wwan_usb_id,
             'APN': config.wwan_apn,
         }
         self._check_connection_cmd = [
@@ -81,4 +80,11 @@ class UplinkMonitor:
         stdout, stderr = await proc.communicate()
         stdout = stdout.decode() if stdout else ''
         stderr = stderr.decode() if stderr else ''
+
+        logger.debug(f'Debug output of {" ".join(command)}, env: {env}')
+        logger.debug(f"STDOUT:")
+        logger.debug(f"{stdout}")
+        logger.debug(f"STDERR:")
+        logger.debug(f"{stderr}")
+
         return proc.returncode, stdout, stderr

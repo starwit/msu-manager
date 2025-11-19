@@ -9,7 +9,6 @@ uplink_monitor:
   enabled: true
   restore_connection_cmd: ["sudo", "/usr/bin/bash", "/usr/bin/lte-connect.sh"]      # Command to restore the connection (use a dummy command like "touch /tmp/restore_called" for testing)
   wwan_device: 'wwan0'                                                              # WWAN interface name (see mmcli -m any and check System.ports, it's probably wwan0)
-  wwan_usb_id: '1234:5678'                                                          # USB device ID of the WWAN modem (see lsusb)
   wwan_apn: 'test.apn'                                                              # APN to use for the WWAN connection
   check_connection_target: '1.1.1.1'                                                # Target to ping for connection checks
   check_connection_device: 'wwan0'                                                  # Device to use for connection checks (should mostly be the same as wwan_device, null/unset means any uplink will do)
