@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -o pipefail
+set -o errexit
+set -o nounset
 
 # APN="internet.telekom"
 # WWAN_IFACE="wwan0"
