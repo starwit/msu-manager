@@ -3,24 +3,14 @@ In this document, you'll find all information to run and to use MSU-Manager.
 
 ## App Configuration
 
-After installation config file of service is located at /etc/msu-manager/settings.yaml. Here is an example of configuration file:
+After installation config file of service is located at /etc/msu-manager/settings.yaml. Refer to the [settings template](../settings.template.yaml) for an example.
 
-```yaml
-log_level: INFO
-udp_bind_address: 0.0.0.0 # bind address for service
-udp_listen_port: 5151 # port for listener
-shutdown_delay_s: 180 # shutdown delay in seconds
-shutdown_command: ['sudo', 'shutdown', '-h', 'now'] # be careful if you want to test on your machine
-```
 ## OS Configuration
 _This should have been set up by the installation script._
 In order to allow service to execute shutdown command without password prompt using sudo, you need to add following line to sudoers file. You can add and edit a sudoers file using visudo command.
 
-```
-sudo visudo -f /etc/sudoers.d/msu-manager
-# Add the following line
-# msumanager ALL=NOPASSWD: /usr/sbin/shutdown -h now
-```
+If you want to create the sudo policy manually, please refer to the [postinst script](../debian/preinst). \
+Then use `sudo visudo -f /etc/sudoers.d/msu-manager` to create / edit the file.
 
 ## Managing the Service
 To see if service is running use the following command:
