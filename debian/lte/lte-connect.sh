@@ -141,6 +141,10 @@ reset_modem() {
     local at_port=$(get_modem_at_port)
     echo "Resetting modem via AT command on $at_port"
     echo -ne 'AT&F\r\n' > $at_port
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to send reset command to modem, exiting"
+        exit 1
+    fi
 }
 
 is_mbim_driver_active() {
@@ -149,19 +153,36 @@ is_mbim_driver_active() {
 
 get_usb_id() {
     mmcli -m any -J | jq -r '.modem.generic.device' | grep -Po '[0-9\-]+$'
+    if [[ $? -ne 0 ]]; then
+        echo "USB ID lookup failed, exiting"
+        exit 1
+    fi
 }
 
 get_modem_id() {
     mmcli -m any -J | jq -r '.modem."dbus-path"' | grep -Po '\d+$'
+    if [[ $? -ne 0 ]]; then
+        echo "Modem ID lookup failed, exiting"
+        exit 1
+    fi
 }
 
 get_modem_state() {
     mmcli -m any -J | jq -r '.modem.generic.state'
+    if [[ $? -ne 0 ]]; then
+        echo "Modem state lookup failed, exiting"
+        exit 1
+    fi
 }
 
 get_modem_at_port() {
     # We need to use the secondary at port if there are multiple, because the first one is often already in use
-    local device_name=$(mmcli -m any -J | jq -r '[.modem.generic.ports[] | select(contains("at"))] | sort | .[-1]' | grep -Po '^\w+')
+    local device_name
+    device_name=$(mmcli -m any -J | jq -r '[.modem.generic.ports[] | select(contains("at"))] | sort | .[-1]' | grep -Po '^\w+')
+    if [[ $? -ne 0 ]]; then
+        echo "AT serial device lookup failed, exiting"
+        exit 1
+    fi
     echo "/dev/$device_name"
 }
 
