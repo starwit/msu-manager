@@ -29,8 +29,12 @@ main() {
     fi
 
     if ! wait_for_modem_hardware; then
-        echo "Failed to detect modem"
-        exit 1
+        echo "Failed to detect modem, trying to restart ModemManager"
+        restart_modemmanager
+        if ! wait_for_modem_hardware; then
+            echo "Modem detection failed after ModemManager restart, exiting"
+            exit 1
+        fi
     fi
 
     echo "Trying simple-connect"
@@ -48,7 +52,7 @@ main() {
     fi
     
     if ! wait_for_modem_hardware; then
-        echo "Modem failed to register with the OS"
+        echo "Modem failed to register with the OS after reset"
         mmcli -m any
         exit 1
     fi
@@ -82,6 +86,7 @@ check_connection() {
 
 wait_for_modem_hardware() {
     echo "Waiting for ModemManager to pick up modem (timeout 90s)"
+    mmcli -S
     for i in {1..45}; do
         echo "Checking for modem (attempt $i)..."
         if mmcli -m any &>/dev/null; then
@@ -143,6 +148,15 @@ reset_modem() {
     echo -ne 'AT&F\r\n' > $at_port
     if [[ $? -ne 0 ]]; then
         echo "Failed to send reset command to modem, exiting"
+        exit 1
+    fi
+}
+
+restart_modemmanager() {
+    echo "Restarting ModemManager service"
+    systemctl restart ModemManager.service
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to restart ModemManager service, exiting"
         exit 1
     fi
 }
