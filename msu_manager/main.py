@@ -3,6 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, status
+from fastapi.staticfiles import StaticFiles
 
 from .config import MsuManagerConfig
 from .hcu import HcuController, HcuProtocol
@@ -79,3 +80,5 @@ async def command_endpoint(command: HcuMessage):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='HcuController is disabled')
 
     await app.state.hcu_controller.process_command(command)
+
+app.mount("/", StaticFiles(directory="msu_manager/frontend",html = True), name="frontend")
