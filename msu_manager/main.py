@@ -81,4 +81,4 @@ async def command_endpoint(command: HcuMessage):
 
     await app.state.hcu_controller.process_command(command)
 
-app.mount("/", StaticFiles(directory="msu_manager/frontend",html = True), name="frontend")
+app.mount("/", StaticFiles(directory="frontend/dist",html = True), name="frontend")
