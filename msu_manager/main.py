@@ -47,6 +47,9 @@ async def before_startup(app: FastAPI):
         app.state.uplink_monitor_task = asyncio.create_task(uplink_monitor.run())
 
         logger.info('Started UplinkMonitor')
+        
+    if CONFIG.frontend.enabled:
+        app.mount("/", StaticFiles(directory=CONFIG.frontend.path,html = True), name="frontend")
 
 async def after_shutdown(app: FastAPI):
     if app.state.CONFIG.hcu_controller.enabled:
@@ -81,4 +84,3 @@ async def command_endpoint(command: HcuMessage):
 
     await app.state.hcu_controller.process_command(command)
 
-app.mount("/", StaticFiles(directory="frontend/dist",html = True), name="frontend")

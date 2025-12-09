@@ -13,3 +13,6 @@ uplink_monitor:
   check_connection_target: '1.1.1.1'                                                # Target to ping for connection checks
   check_connection_device: 'wwan0'                                                  # Device to use for connection checks (should mostly be the same as wwan_device, null/unset means any uplink will do)
   check_interval_s: 10
+frontend:
+  enabled: true
+  location: dist

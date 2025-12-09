@@ -30,7 +30,13 @@ set-version:
 		-- \
 	    --author "$(NAME) <$(EMAIL)>"
 
-build-deb: settings.yaml
+package-frontend:
+	cd frontend; \
+	npm install; \
+	npm run build; \
+	cd ..; \
+
+build-deb: settings.yaml package-frontend
 
 	poetry export --without-hashes --format=requirements.txt > requirements.txt
 

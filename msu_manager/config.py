@@ -39,12 +39,19 @@ class HcuControllerConfig(BaseModel):
 
 class HcuControllerConfigDisabled(BaseModel):
     enabled: Literal[False] = False
+    
+class FrontendConfig(BaseModel):
+    enabled: Literal[True]
+    path: str = 'dist'
 
+class FrontendConfigDisabled(BaseModel):
+    enabled: Literal[False] = False
 
 class MsuManagerConfig(BaseSettings):
     log_level: LogLevel = LogLevel.INFO
     hcu_controller: HcuControllerConfig | HcuControllerConfigDisabled = Field(discriminator='enabled', default=HcuControllerConfigDisabled())
     uplink_monitor: UplinkMonitorConfig | UplinkMonitorConfigDisabled = Field(discriminator='enabled', default=UplinkMonitorConfigDisabled())
+    frontend: FrontendConfig | FrontendConfigDisabled = Field(discriminator='enabled', default=FrontendConfigDisabled())
 
 
     model_config = SettingsConfigDict(env_nested_delimiter='__')
