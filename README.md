@@ -3,11 +3,29 @@ This components manages various aspects for Mobilytix Sensoring Units among whic
 One of its core features is receiving commands from the [HCU (Hardware Control Unit)](https://github.com/starwit/msu-controller). It is shipped for Debian based Linux distributions and is tested with Ubuntu. 
 
 ## Local Development
+App consists of two parts: Python backend and React frontend.
+
+### Build Frontend
+Copy settings template in a new file and configure frontend values like so:
+```yaml
+frontend:
+  enabled: true
+  path: 'frontend/dist'
+```
+Then run in folder frontend:
+```bash
+npm install
+npm run build
+```
+
+### Run backend
 To run the application manually you can use Poetry:
 ```bash
 poetry install
 poetry run fastapi run msu_manager/main.py
 ```
+
+Application will serve frontend under: http://localhost:8000. If you run npm start in frontend folder, you let npm compile React code on the fly.
 
 ## Usage
 
@@ -23,6 +41,7 @@ Things you need to build package.
 * Python 
 * Poetry
 * build-essentials
+* npm
 
 ### Build APT package
 Makefile has target to build an APT package. Virtual environment is created by exporting Poetry dependencies into a requirements.txt file. APT is build like so:
