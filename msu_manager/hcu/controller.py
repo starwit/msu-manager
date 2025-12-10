@@ -1,9 +1,9 @@
-import time
 import asyncio
 import logging
+import time
 from typing import List
 
-from prometheus_client import Gauge, Summary
+from prometheus_client import Enum, Gauge, Summary
 
 from .messages import (HcuMessage, HeartbeatCommand, LogCommand, ResumeCommand,
                        ShutdownCommand)
@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 TIME_SINCE_LAST_HEARTBEAT_SUMMARY = Summary('hcu_time_since_last_heartbeat', 'Tracks time intervals between HCU heartbeats')
 NUMERIC_LOG_GAUGE = Gauge('hcu_log', 'Tracks numeric HCU log event values', ['key'])
+IGNITION_STATE_ENUM = Enum('hcu_ignition_state', 'Ignition state of the vehicle as reported by the HCU', states=['on', 'off', 'unknown'])
 
 
 class HcuController:
@@ -20,6 +21,7 @@ class HcuController:
         self.shutdown_delay_s = shutdown_delay_s
         self._shutdown_task = None
         self._last_heartbeat_time = time.time()
+        IGNITION_STATE_ENUM.state('unknown')
 
     async def process_command(self, command: HcuMessage):
         logger.info(f'Processing {type(command).__name__}')
@@ -34,6 +36,8 @@ class HcuController:
                 self._handle_log(command)
                 
     async def handle_shutdown(self):
+        IGNITION_STATE_ENUM.state('off')
+
         if self._shutdown_task is not None:
             logger.warning('Shutdown already scheduled, ignoring duplicate request.')
             return
@@ -42,6 +46,8 @@ class HcuController:
         self._shutdown_task = asyncio.create_task(self._delayed_shutdown())
 
     async def handle_resume(self):
+        IGNITION_STATE_ENUM.state('on')
+        
         if self._shutdown_task is None:
             logger.warning('No shutdown scheduled, nothing to resume.')
             return
@@ -83,5 +89,12 @@ class HcuController:
 
     def _handle_log(self, command: LogCommand):
         logger.info(f'LOG - {command.key}: {command.value}')
+        if self._is_number(command.value):
+            NUMERIC_LOG_GAUGE.labels(command.key).set(float(command.value))
         
-        
+    def _is_number(self, value: str) -> bool:
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
