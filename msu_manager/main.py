@@ -71,11 +71,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.get('/health', status_code=status.HTTP_204_NO_CONTENT)
+@app.get('/api/health')
 async def health():
-    pass
+    result = {}
+    result['name'] = "MSU Manager"
+    result['version'] = "1.0.2"    
+    return result
 
-@app.post('/hcu-controller/command', status_code=status.HTTP_204_NO_CONTENT, responses={404: {}})
+@app.post('/api/hcu-controller/command', status_code=status.HTTP_204_NO_CONTENT, responses={404: {}})
 async def command_endpoint(command: HcuMessage):
     logger.info(f'Received {type(command).__name__} via HTTP: {command.model_dump_json(indent=2)}')
     if not app.state.CONFIG.hcu_controller.enabled:
