@@ -15,4 +15,4 @@ uplink_monitor:
   check_interval_s: 10
 frontend:
   enabled: true
-  location: dist
+  path: dist
