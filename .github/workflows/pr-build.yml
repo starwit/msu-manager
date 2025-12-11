@@ -35,7 +35,7 @@ jobs:
     needs: pr-build-poetry
     runs-on: [self-hosted, linux, X64]
     container:
-        image: starwitorg/debian-packaging:0.0.3
+        image: starwitorg/debian-packaging:0.0.6
         env:
           PASSPHRASE: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD_FLAT }}
           GPG_KEY: ${{ secrets.OSSRH_GPG_SECRET_KEY_B64 }}

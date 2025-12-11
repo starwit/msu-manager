@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 import prometheus_client
 from fastapi import FastAPI, HTTPException, status
+from fastapi.staticfiles import StaticFiles
 
 from .config import MsuManagerConfig
 from .hcu import HcuController, HcuProtocol
@@ -47,6 +48,9 @@ async def before_startup(app: FastAPI):
         app.state.uplink_monitor_task = asyncio.create_task(uplink_monitor.run())
 
         logger.info('Started UplinkMonitor')
+        
+    if CONFIG.frontend.enabled:
+        app.mount("/", StaticFiles(directory=CONFIG.frontend.path,html = True), name="frontend")
 
 async def after_shutdown(app: FastAPI):
     if app.state.CONFIG.hcu_controller.enabled:
@@ -69,11 +73,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.mount('/api/metrics', prometheus_client.make_asgi_app())
 
-@app.get('/health', status_code=status.HTTP_204_NO_CONTENT)
+@app.get('/api/health')
 async def health():
-    pass
+    result = {}
+    result['name'] = "MSU Manager"
+    result['version'] = "1.0.2"    
+    return result
 
-@app.post('/hcu-controller/command', status_code=status.HTTP_204_NO_CONTENT, responses={404: {}})
+@app.post('/api/hcu-controller/command', status_code=status.HTTP_204_NO_CONTENT, responses={404: {}})
 async def command_endpoint(command: HcuMessage):
     logger.info(f'Received {type(command).__name__} via HTTP: {command.model_dump_json(indent=2)}')
     if not app.state.CONFIG.hcu_controller.enabled:
@@ -81,3 +88,4 @@ async def command_endpoint(command: HcuMessage):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='HcuController is disabled')
 
     await app.state.hcu_controller.process_command(command)
+
