@@ -1,13 +1,13 @@
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI
 
 from .config import MsuManagerConfig
-from .hcu import HcuController, HcuProtocol
-from .hcu.messages import HcuMessage
-from .uplink.monitor import UplinkMonitor
+from .hcu import close as close_hcu
+from .hcu import init as init_hcu
+from .uplink import close as close_uplink_monitor
+from .uplink import init as init_uplink_monitor
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,38 +26,17 @@ async def before_startup(app: FastAPI):
     logging.getLogger().setLevel(app.state.CONFIG.log_level.value)
 
     if CONFIG.hcu_controller.enabled:
-        hcu_controller = HcuController(CONFIG.hcu_controller.shutdown_command, CONFIG.hcu_controller.shutdown_delay_s)
-        app.state.hcu_controller = hcu_controller
-
-        hcu_bind_address = CONFIG.hcu_controller.udp_bind_address
-        hcu_listen_port = CONFIG.hcu_controller.udp_listen_port
-        loop = asyncio.get_running_loop()
-        transport, protocol = await loop.create_datagram_endpoint(
-            lambda: HcuProtocol(controller=hcu_controller), local_addr=(hcu_bind_address, hcu_listen_port)
-        )
-        app.state.hcu_transport = transport
-        app.state.hcu_protocol = protocol
-
-        logger.info(f'Started HcuProtocol UDP listener on {hcu_bind_address}:{hcu_listen_port}')
+        init_hcu(app, CONFIG.hcu_controller)
 
     if CONFIG.uplink_monitor.enabled:
-        uplink_monitor = UplinkMonitor(CONFIG.uplink_monitor)
-        app.state.uplink_monitor = uplink_monitor
-        app.state.uplink_monitor_task = asyncio.create_task(uplink_monitor.run())
-
-        logger.info('Started UplinkMonitor')
+        init_uplink_monitor(app, CONFIG.uplink_monitor)
 
 async def after_shutdown(app: FastAPI):
     if app.state.CONFIG.hcu_controller.enabled:
-        app.state.hcu_transport.close()
+        close_hcu(app)
 
     if app.state.CONFIG.uplink_monitor.enabled:
-        app.state.uplink_monitor_task.cancel()
-        try:
-            await app.state.uplink_monitor_task
-        except asyncio.CancelledError:
-            # Task cancellation is expected here as we've called cancel()
-            pass
+        close_uplink_monitor(app)
     
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -66,16 +45,3 @@ async def lifespan(app: FastAPI):
     await after_shutdown(app)
 
 app = FastAPI(lifespan=lifespan)
-
-@app.get('/health', status_code=status.HTTP_204_NO_CONTENT)
-async def health():
-    pass
-
-@app.post('/hcu-controller/command', status_code=status.HTTP_204_NO_CONTENT, responses={404: {}})
-async def command_endpoint(command: HcuMessage):
-    logger.info(f'Received {type(command).__name__} via HTTP: {command.model_dump_json(indent=2)}')
-    if not app.state.CONFIG.hcu_controller.enabled:
-        logger.warning('HcuController is disabled; ignoring command')
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='HcuController is disabled')
-
-    await app.state.hcu_controller.process_command(command)
