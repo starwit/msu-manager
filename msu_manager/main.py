@@ -2,6 +2,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
+import prometheus_client
 from fastapi import FastAPI, HTTPException, status
 
 from .config import MsuManagerConfig
@@ -66,6 +67,7 @@ async def lifespan(app: FastAPI):
     await after_shutdown(app)
 
 app = FastAPI(lifespan=lifespan)
+app.mount('/api/metrics', prometheus_client.make_asgi_app())
 
 @app.get('/health', status_code=status.HTTP_204_NO_CONTENT)
 async def health():
