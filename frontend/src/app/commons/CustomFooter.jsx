@@ -15,7 +15,7 @@ function CustomFooter() {
         <Container color="secondary">
             <AppBar color="secondary" sx={{position: "fixed", top: "auto", bottom: 0}}>
                 <Toolbar sx={{justifyContent: "center"}}>
-                    <img src={general} height={30} alt="Urbalytix" />
+                    <img src={general} height={30} alt="MSU Manager" />
                     <Typography sx={{marginLeft: 1}}>{t('home.copyright')}</Typography>
                 </Toolbar >
             </AppBar>

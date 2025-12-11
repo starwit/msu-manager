@@ -24,7 +24,7 @@ function Layout({children}) {
                                 aria-label="menu"
                                 sx={{margin: 0, padding: 0, marginRight: 2}}
                             >
-                                <img src={DynamicLogo} height={40} alt="Urbalytix" />
+                                <img src={DynamicLogo} height={40} alt="MSU Manager" />
                             </IconButton>
                             <Typography variant="h1" component="div" noWrap>
                                 MSU Manager
