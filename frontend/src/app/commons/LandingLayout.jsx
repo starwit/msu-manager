@@ -27,7 +27,7 @@ function Layout({children}) {
                                 <img src={DynamicLogo} height={40} alt="Urbalytix" />
                             </IconButton>
                             <Typography variant="h1" component="div" noWrap>
-                                {import.meta.env.VITE_TITLE}
+                                MSU Manager
                             </Typography>
                         </Stack>
                     </Toolbar>

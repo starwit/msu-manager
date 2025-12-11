@@ -42,6 +42,10 @@ const translationEnEN = {
     "error.entity.notfound": "This element could not be found.",
     "home.about": "Information about the Application",
     "menu.config": "Configuration",
-
+    "area.status":"Status Overview",
+    "area.sensors":"Connected Sensors",
+    "area.network":"Network status",
+    "area.system":"System Configuration",
+    "area.position":"Position"
 };
 export default translationEnEN;

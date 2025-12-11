@@ -42,6 +42,10 @@ const translationDeDE = {
     "error.entity.notfound": "Dieses Element konnte nicht gefunden werden.",
     "home.about": "Informationen über die Anwendung",
     "menu.config": "Konfiguration",
-
+    "area.status":"Status",
+    "area.sensors":"Sensorstatus",
+    "area.network":"Netzwerkstatus",
+    "area.system":"Systemeinstellungen",
+    "area.position":"Position"
 };
 export default translationDeDE;
