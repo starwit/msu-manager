@@ -1,7 +1,9 @@
 import logging
 from contextlib import asynccontextmanager
 
+import prometheus_client
 from fastapi import APIRouter, FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from .config import MsuManagerConfig
 from .hcu import HcuSkill
@@ -39,6 +41,9 @@ async def before_startup(app: FastAPI):
         await uplink.run()
         app.state.uplink_skill = uplink
         app.include_router(uplink_router)
+        
+    if CONFIG.frontend.enabled:
+        app.mount("/", StaticFiles(directory=CONFIG.frontend.path,html = True), name="frontend")
 
 async def after_shutdown(app: FastAPI):
     if app.state.CONFIG.hcu_controller.enabled:
@@ -54,3 +59,4 @@ async def lifespan(app: FastAPI):
     await after_shutdown(app)
 
 app = FastAPI(lifespan=lifespan)
+app.mount('/api/metrics', prometheus_client.make_asgi_app())

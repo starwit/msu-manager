@@ -2,6 +2,7 @@ settings.yaml /etc/msu-manager
 
 requirements.txt /opt/msu-manager
 msu_manager /opt/msu-manager
+frontend/dist /opt/msu-manager
 
 debian/msu-manager.service /usr/lib/systemd/system/
 

@@ -1,4 +1,4 @@
-# Power Toggle Service User's Manual
+# MSU Manager User Manual
 In this document, you'll find all information to run and to use MSU-Manager.
 
 ## Deployment
@@ -25,7 +25,11 @@ systemctl status msu-manager
 
 Please refer to SystemD documentation for more info, on how to use services, e.g. https://wiki.archlinux.org/title/Systemd
 
-## Network Protocol
+## Components
+
+### HCU
+
+#### Network Protocol
 This application receives UDP messages from HCU (Hardware Control Unit). This is a micro controller based device, that manages power, temperature and a number of other physical aspects. Both application parts thus need to follow a shared protocol.
 
 Protocol is composed of the following messages:
@@ -50,3 +54,6 @@ Protocol is composed of the following messages:
     "value": "value"
 }
 ```
+
+#### Metrics
+The application logs ignition state, heartbeat intervals and all logged metrics (like temperature or fan speed) and provides a Prometheus text format endpoint under `/api/metrics/`.

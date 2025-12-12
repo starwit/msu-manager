@@ -1,0 +1,53 @@
+{
+    "name": "msu-manager-webapp",
+    "version": "0.1.0",
+    "license": "AGPLv3",
+    "private": true,
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@mui/icons-material": "7.3.5",
+        "@mui/lab": "^7.0.1-beta.20",
+        "@mui/material": "^7.3.5",
+        "@mui/x-data-grid": "8.18.0",
+        "@mui/x-tree-view": "8.18.0",
+        "@turf/turf": "7.3.0",
+        "axios": "1.12.2",
+        "dayjs": "1.11.19",
+        "i18next": "25.6.2",
+        "i18next-browser-languagedetector": "8.2.0",
+        "react": "19.2.0",
+        "react-dom": "19.2.0",
+        "react-i18next": "16.3.3",
+        "react-router": "7.9.6",
+        "react-router-dom": "7.9.6",
+        "react-toastify": "11.0.5"
+    },
+    "scripts": {
+        "start": "vite",
+        "build": "vite build"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-react": "5.1.1",
+        "buffer": "6.0.3",
+        "eslint": "9.39.1",
+        "eslint-config-google": "0.14.0",
+        "eslint-plugin-import": "2.32.0",
+        "eslint-plugin-node": "11.1.0",
+        "eslint-plugin-promise": "7.2.1",
+        "eslint-plugin-react": "7.37.5",
+        "http": "npm:stream-http@^3.2.0",
+        "https": "npm:https-browserify@^1.0.0",
+        "path": "npm:path-browserify@^1.0.1",
+        "prop-types": "15.8.1",
+        "stream": "npm:stream-browserify@^3.0.0",
+        "unplugin": "2.3.10",
+        "util": "^0.12.5",
+        "vfile": "^6.0.3",
+        "vite": "7.2.2",
+        "zlib": "npm:browserify-zlib@^0.2.0"
+    }
+}
