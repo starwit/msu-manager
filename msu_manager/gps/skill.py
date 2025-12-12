@@ -35,4 +35,4 @@ class GpsSkill:
 
         @router.get('/position', status_code=status.HTTP_200_OK)
         async def position_endpoint():
-            return {'status': 'UP' if self._gps_monitor.is_up else 'DOWN'}
+            return self._gps_monitor.position
