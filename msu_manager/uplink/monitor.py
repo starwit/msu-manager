@@ -24,13 +24,18 @@ class UplinkMonitor:
             config.check_connection_target,
         ]
         self._check_interval_s = config.check_interval_s
+        self._is_up = False
+
+    @property
+    def is_up(self):
+        return self._is_up
 
     async def run(self):
         try:
             while True:
-                is_up = await self.check_connection()
-                logger.debug(f'Connection status: {"up" if is_up else "down"}')
-                if not is_up:
+                self._is_up = await self.check_connection()
+                logger.debug(f'Connection status: {"up" if self._is_up else "down"}')
+                if not self._is_up:
                     logger.warning("Connection is down, attempting to restore...")
                     success = await self.restore_connection()
                     if success:

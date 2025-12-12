@@ -1,13 +1,12 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 
 from .config import MsuManagerConfig
-from .hcu import close as close_hcu
-from .hcu import init as init_hcu
-from .uplink import close as close_uplink_monitor
-from .uplink import init as init_uplink_monitor
+from .hcu import HcuSkill
+from .uplink import UplinkSkill
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,17 +25,27 @@ async def before_startup(app: FastAPI):
     logging.getLogger().setLevel(app.state.CONFIG.log_level.value)
 
     if CONFIG.hcu_controller.enabled:
-        init_hcu(app, CONFIG.hcu_controller)
+        hcu = HcuSkill(CONFIG.hcu_controller)
+        hcu_router = APIRouter(prefix='/api/hcu')
+        hcu.add_routes(hcu_router)
+        await hcu.run()
+        app.state.hcu_skill = hcu
+        app.include_router(hcu_router)
 
     if CONFIG.uplink_monitor.enabled:
-        init_uplink_monitor(app, CONFIG.uplink_monitor)
+        uplink = UplinkSkill(CONFIG.uplink_monitor)
+        uplink_router = APIRouter(prefix='/api/uplink')
+        uplink.add_routes(uplink_router)
+        await uplink.run()
+        app.state.uplink_skill = uplink
+        app.include_router(uplink_router)
 
 async def after_shutdown(app: FastAPI):
     if app.state.CONFIG.hcu_controller.enabled:
-        close_hcu(app)
+        await app.state.hcu_skill.close()
 
     if app.state.CONFIG.uplink_monitor.enabled:
-        close_uplink_monitor(app)
+        await app.state.uplink_skill.close()
     
 @asynccontextmanager
 async def lifespan(app: FastAPI):
