@@ -541,6 +541,21 @@ files = [
 ]
 
 [[package]]
+name = "gpsd-client-async"
+version = "1.1.2"
+description = "Read data from gpsd daemon using asyncio library"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "gpsd_client_async-1.1.2-py3-none-any.whl", hash = "sha256:49c79f9f036d160f067d910660cff24a2947957a28bc83231bad301aec7f1afb"},
+    {file = "gpsd_client_async-1.1.2.tar.gz", hash = "sha256:46cd36a1345b2e0250fa8156362b0f22a245b883925923683ddeba410edccb3a"},
+]
+
+[package.dependencies]
+pydantic = ">=2.9.0,<3.0"
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -2177,4 +2192,4 @@ dev = ["pytest", "setuptools"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "108e978f1a3fbcc9c9011af1e9f19300e10d5d115e6a7c4d425a3a9ecb225afb"
+content-hash = "edd5af0e122d3171b85c8aa8fa37352250087961bbdac189a7bbd35b19ce8b6c"

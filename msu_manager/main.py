@@ -6,9 +6,9 @@ from fastapi import APIRouter, FastAPI, status
 from fastapi.staticfiles import StaticFiles
 
 from .config import MsuManagerConfig
+from .gps import GpsSkill
 from .hcu import HcuSkill
 from .uplink import UplinkSkill
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,12 +45,23 @@ async def before_startup(app: FastAPI):
     if CONFIG.frontend.enabled:
         app.mount("/", StaticFiles(directory=CONFIG.frontend.path,html = True), name="frontend")
 
+    if CONFIG.gps.enabled:
+        gps = GpsSkill(CONFIG.gps)
+        gps_router = APIRouter(prefix='/api/gps')
+        gps.add_routes(gps_router)
+        await gps.run()
+        app.state.gps_skill = gps
+        app.include_router(gps_router)
+
 async def after_shutdown(app: FastAPI):
     if app.state.CONFIG.hcu_controller.enabled:
         await app.state.hcu_skill.close()
 
     if app.state.CONFIG.uplink_monitor.enabled:
         await app.state.uplink_skill.close()
+
+    if app.state.CONFIG.gps.enabled:
+        await app.state.gps_skill.close()
     
 @asynccontextmanager
 async def lifespan(app: FastAPI):

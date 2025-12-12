@@ -39,19 +39,35 @@ class HcuControllerConfig(BaseModel):
 
 class HcuControllerConfigDisabled(BaseModel):
     enabled: Literal[False] = False
-    
+
+
 class FrontendConfig(BaseModel):
     enabled: Literal[True]
     path: str = 'dist'
 
+
 class FrontendConfigDisabled(BaseModel):
     enabled: Literal[False] = False
+
+
+class GpsConfig(BaseModel):
+    enabled: Literal[True]
+    measurement_rate_ms: int = 200
+    measurement_rate_set_cmd: List[str]
+    gpsd_host: str = '127.0.0.1'
+    gpsd_port: int = 2947
+    
+
+class GpsConfigDisabled(BaseModel):
+    enabled: Literal[False] = False
+
 
 class MsuManagerConfig(BaseSettings):
     log_level: LogLevel = LogLevel.INFO
     hcu_controller: HcuControllerConfig | HcuControllerConfigDisabled = Field(discriminator='enabled', default=HcuControllerConfigDisabled())
     uplink_monitor: UplinkMonitorConfig | UplinkMonitorConfigDisabled = Field(discriminator='enabled', default=UplinkMonitorConfigDisabled())
     frontend: FrontendConfig | FrontendConfigDisabled = Field(discriminator='enabled', default=FrontendConfigDisabled())
+    gps: GpsConfig | GpsConfigDisabled = Field(discriminator='enabled', default=GpsConfigDisabled())
 
 
     model_config = SettingsConfigDict(env_nested_delimiter='__')
