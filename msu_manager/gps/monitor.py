@@ -1,10 +1,11 @@
 import asyncio
-from ..config import GpsConfig
-from gpsd_client_async import GpsdClient, TpvMessage
-from gpsd_client_async.messages import Mode
 import logging
 import time
-from typing import NamedTuple
+
+from gpsd_client_async import GpsdClient, TpvMessage
+from gpsd_client_async.messages import Mode
+
+from ..config import GpsConfig
 from .types import Position
 
 logger = logging.getLogger(__name__)
@@ -19,20 +20,24 @@ class GpsMonitor:
         self._inferred_measurement_rate_ms = 0
         
     async def run(self):
-        try:
-            async with self._gpsd_client as client:
-                latest_msg_time = 0
+        while True:
+            try:
+                async with self._gpsd_client as client:
+                    latest_msg_time = 0
 
-                async for message in client:
-                    latest_msg_time = time.time()
-                    if isinstance(message, TpvMessage):
-                        self._latest_tpv_msg = message
+                    async for message in client:
+                        latest_msg_time = time.time()
 
-        except asyncio.CancelledError:
-            logger.info("GpsMonitor task cancelled.")
-            raise
-        except Exception as e:
-            logger.error(f"Unexpected error occurred in Gps Monitor", exc_info=True)
+                        if isinstance(message, TpvMessage):
+                            self._latest_tpv_msg = message
+
+            except asyncio.CancelledError:
+                logger.debug('GpsMonitor task cancelled.')
+                raise
+            except (ConnectionError, Exception):
+                logger.warning(f'Error in gpsd connection', exc_info=True)
+                self._latest_tpv_msg = None
+                await asyncio.sleep(2)
 
     @property
     def position(self):
