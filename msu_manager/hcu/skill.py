@@ -5,7 +5,7 @@ from .protocol import HcuProtocol
 from .controller import HcuController
 from .messages import HcuMessage
 from fastapi import APIRouter, FastAPI, HTTPException, status
-
+import serial_asyncio
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,21 +21,22 @@ class HcuSkill:
     async def run(self) -> None:
         self._hcu_controller = HcuController(self._config.shutdown_command, self._config.shutdown_delay_s)
 
-        hcu_bind_address = self._config.udp_bind_address
-        hcu_listen_port = self._config.udp_listen_port
         loop = asyncio.get_running_loop()
-        transport, protocol = await loop.create_datagram_endpoint(
-            lambda: HcuProtocol(controller=self._hcu_controller), local_addr=(hcu_bind_address, hcu_listen_port)
+        transport, protocol = await serial_asyncio.create_serial_connection(
+            loop,
+            lambda: HcuProtocol(controller=self._hcu_controller),
+            str(self._config.serial_device.absolute()),
+            baudrate=self._config.serial_baud_rate,
         )
         self._hcu_transport = transport
         self._hcu_protocol = protocol
 
-        logger.info(f'Started HcuProtocol UDP listener on {hcu_bind_address}:{hcu_listen_port}')
+        logger.info(f'Started HCU skill (on {self._config.serial_device.absolute()})')
 
     async def close(self):
         self._hcu_transport.close()
 
-        logger.info('Stopped HcuProtocol UDP listener')
+        logger.info('Stopped HCU skill')
 
     def add_routes(self, router: APIRouter) -> None:
 

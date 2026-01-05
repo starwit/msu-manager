@@ -24,7 +24,7 @@ class HcuController:
         IGNITION_STATE_ENUM.state('unknown')
 
     async def process_command(self, command: HcuMessage):
-        logger.info(f'Processing {type(command).__name__}')
+        logger.debug(f'Processing {type(command).__name__}')
         match command:
             case ShutdownCommand():
                 await self.handle_shutdown()
