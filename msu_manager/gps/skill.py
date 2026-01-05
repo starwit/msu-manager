@@ -19,7 +19,7 @@ class GpsSkill:
         self._gps_monitor = GpsMonitor(self._config)
         self._monitor_task = asyncio.create_task(self._gps_monitor.run())
 
-        logger.info('Started GPS monitor')
+        logger.info('Started GPS skill')
 
     async def close(self) -> None:
         self._monitor_task.cancel()
@@ -29,7 +29,7 @@ class GpsSkill:
             # Task cancellation is expected here as we've called cancel()
             pass
 
-        logger.info('Stopped GpsSkill')
+        logger.info('Stopped GPS skill')
 
     def add_routes(self, router: APIRouter) -> None:
 

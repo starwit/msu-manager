@@ -4,11 +4,15 @@ import time
 
 from gpsd_client_async import GpsdClient, TpvMessage
 from gpsd_client_async.messages import Mode
+from prometheus_client import Summary
 
+from ..command import run_command
 from ..config import GpsConfig
 from .types import Position
 
 logger = logging.getLogger(__name__)
+
+GPS_MEASUREMENT_INTERVAL_SUMMARY = Summary('gps_measurement_interval', 'Tracks intervals between GPS measurements')
 
 
 class GpsMonitor:
@@ -22,22 +26,36 @@ class GpsMonitor:
     async def run(self):
         while True:
             try:
+                if self._config.init_cmd is not None:
+                    await self._init_gps()
+
                 async with self._gpsd_client as client:
-                    latest_msg_time = 0
+                    previous_msg_time = time.time()
 
                     async for message in client:
-                        latest_msg_time = time.time()
-
                         if isinstance(message, TpvMessage):
                             self._latest_tpv_msg = message
 
+                            current_time = time.time()
+                            GPS_MEASUREMENT_INTERVAL_SUMMARY.observe(current_time - previous_msg_time)
+                            previous_msg_time = current_time
             except asyncio.CancelledError:
                 logger.debug('GpsMonitor task cancelled.')
                 raise
-            except (ConnectionError, Exception):
-                logger.warning(f'Error in gpsd connection', exc_info=True)
+            except (ConnectionError, IOError, Exception):
+                logger.debug(f'Error in gpsd monitor', exc_info=True)
                 self._latest_tpv_msg = None
                 await asyncio.sleep(2)
+
+    async def _init_gps(self) -> None:
+        logger.info(f'Initializing GPS device (running {' '.join(self._config.init_cmd)})')
+
+        retcode, stdout, stderr = await run_command(self._config.init_cmd)
+        if retcode != 0:
+            logger.error(f'GPS init command {' '.join(self._config.init_cmd)} failed with code {retcode}')
+            logger.error(f'STDOUT: {stdout}')
+            logger.error(f'STDERR: {stderr}')
+            raise IOError('Count not initialize GPS device')
 
     @property
     def position(self):

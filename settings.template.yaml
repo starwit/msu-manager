@@ -15,8 +15,7 @@ uplink_monitor:
   check_interval_s: 10
 gps:
   enabled: true
-  measurement_rate_ms: 1000
-  measurement_rate_set_cmd: ['true']
+  init_cmd: ['true']                                                                # Optional command to initialize GPS, e.g. set measurement rate ['ubxtool', '-p', 'CFG-RATE,200']
   gpsd_host: localhost
   gpsd_port: 2947
     

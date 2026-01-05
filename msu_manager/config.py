@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 from pydantic_settings import (BaseSettings, SettingsConfigDict,
@@ -52,8 +52,7 @@ class FrontendConfigDisabled(BaseModel):
 
 class GpsConfig(BaseModel):
     enabled: Literal[True]
-    measurement_rate_ms: int = 200
-    measurement_rate_set_cmd: List[str]
+    init_cmd: Optional[List[str]] = None
     gpsd_host: str = '127.0.0.1'
     gpsd_port: int = 2947
     
