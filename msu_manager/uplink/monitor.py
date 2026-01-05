@@ -1,9 +1,8 @@
 
 import logging
 import asyncio
-import os
-from typing import Dict, List, Tuple
 
+from ..command import run_command
 from ..config import UplinkMonitorConfig
 
 logger = logging.getLogger(__name__)
@@ -50,7 +49,7 @@ class UplinkMonitor:
             logger.error(f"Unexpected error occurred in UplinkMonitor", exc_info=True)
 
     async def check_connection(self) -> bool:
-        ret_code, stdout, stderr = await self._run_command(self._check_connection_cmd)
+        ret_code, stdout, stderr = await run_command(self._check_connection_cmd)
 
         if ret_code == 0:
             return True
@@ -63,7 +62,7 @@ class UplinkMonitor:
             return False
 
     async def restore_connection(self) -> bool:
-        ret_code, stdout, stderr = await self._run_command(self._restore_connection_cmd, env=self._restore_connection_env)
+        ret_code, stdout, stderr = await run_command(self._restore_connection_cmd, env=self._restore_connection_env)
 
         if ret_code == 0:
             return True
@@ -75,21 +74,3 @@ class UplinkMonitor:
             logger.error(f"{stderr}")
             return False
 
-    async def _run_command(self, command: List[str], env: Dict[str, str] = None) -> Tuple[int, str, str]:
-        proc = await asyncio.create_subprocess_exec(
-            *command,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            env={**os.environ, **env} if env else None
-        )
-        stdout, stderr = await proc.communicate()
-        stdout = stdout.decode() if stdout else ''
-        stderr = stderr.decode() if stderr else ''
-
-        logger.debug(f'Debug output of {" ".join(command)}, env: {env}')
-        logger.debug(f"STDOUT:")
-        logger.debug(f"{stdout}")
-        logger.debug(f"STDERR:")
-        logger.debug(f"{stderr}")
-
-        return proc.returncode, stdout, stderr
