@@ -14,7 +14,7 @@ pydantic-settings = "2.12.0"
 pyaml = "25.7.0"
 fastapi = {extras = ["standard"], version = "0.124.0"}
 prometheus-client = "0.23.1"
-gpsd-client-async = {git = "https://github.com/flonix8/asyncio-gpsd-client.git", rev = "b93a3f2"}
+gpsd-client-async = "2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "9.0.2"

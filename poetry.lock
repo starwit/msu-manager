@@ -542,22 +542,18 @@ files = [
 
 [[package]]
 name = "gpsd-client-async"
-version = "1.1.2"
+version = "2.0.0"
 description = "Read data from gpsd daemon using asyncio library"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "gpsd_client_async-2.0.0-py3-none-any.whl", hash = "sha256:f231c47e97c40e89882832879146e80438be8105aa559dace2d083aa97271fd2"},
+    {file = "gpsd_client_async-2.0.0.tar.gz", hash = "sha256:4925752d72504fc689e3dda4f407c042af178932161de8c9d341a1cd8761428f"},
+]
 
 [package.dependencies]
 pydantic = ">=2.9.0,<3.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/flonix8/asyncio-gpsd-client.git"
-reference = "b93a3f2"
-resolved_reference = "b93a3f2d942c1e2f0dd8d9b8ef36f8d4c49bc030"
 
 [[package]]
 name = "h11"
@@ -2196,4 +2192,4 @@ dev = ["pytest", "setuptools"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "a2feb86d97e5f9b8fe89d77ceff9193eacede72a6fd59e3699c1017328951532"
+content-hash = "b4eec41ab5a5151edd966417f9134bca9ca102e0b93ab77614379894ca28d06e"
