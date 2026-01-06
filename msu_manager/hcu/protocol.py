@@ -20,9 +20,9 @@ class HcuProtocol(asyncio.Protocol):
         self._transport = transport
 
     def data_received(self, data: bytes) -> None:
-        logger.debug(f'Received {len(data)} bytes from HCU')
+        logger.debug(f'Received {len(data)} bytes from HCU: {data.hex()}')
 
-        self._buffer += data.decode()
+        self._buffer += data.decode(encoding='ascii', errors='ignore')
 
         while '\n' in self._buffer:
             logger.debug(f'Received raw command from HCU')
@@ -33,7 +33,8 @@ class HcuProtocol(asyncio.Protocol):
         try:
             json_dict = json.loads(command.strip())
         except (UnicodeDecodeError, JSONDecodeError):
-            logger.error(f'Failed to decode command from HCU', exc_info=True)
+            logger.error(f'Failed to parse JSON command from HCU: {command.strip()}')
+            logger.debug(f'Decode error', exc_info=True)
             return
         
         command = validate_python_message(json_dict)

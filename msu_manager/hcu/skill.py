@@ -1,12 +1,13 @@
 import asyncio
-from fastapi import APIRouter
+import logging
+
+import serial_asyncio
+from fastapi import APIRouter, HTTPException, status
+
 from ..config import HcuControllerConfig
-from .protocol import HcuProtocol
 from .controller import HcuController
 from .messages import HcuMessage
-from fastapi import APIRouter, FastAPI, HTTPException, status
-import serial_asyncio
-import logging
+from .protocol import HcuProtocol
 
 logger = logging.getLogger(__name__)
 
