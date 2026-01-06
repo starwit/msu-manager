@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 from json import JSONDecodeError
-from typing import Tuple
 
 from .controller import HcuController
 from .messages import validate_python_message
@@ -15,9 +14,11 @@ class HcuProtocol(asyncio.Protocol):
         self._controller = controller
         self._transport = None
         self._buffer = ''
+        self._is_connected = False
         
     def connection_made(self, transport: asyncio.Transport) -> None:
         self._transport = transport
+        self._is_connected = True
 
     def data_received(self, data: bytes) -> None:
         logger.debug(f'Received {len(data)} bytes from HCU: {data.hex()}')
@@ -43,5 +44,13 @@ class HcuProtocol(asyncio.Protocol):
         if self._controller:
             asyncio.create_task(self._controller.process_command(command))
 
+    @property
+    def is_connected(self) -> bool:
+        return self._is_connected
+
     def connection_lost(self, exc):
-        logger.info('HcuProtocol serial listener stopped', exc_info=exc)
+        logger.debug('HcuProtocol serial listener stopped', exc_info=exc)
+        self._is_connected = False
+    
+    def close(self) -> None:
+        self._transport.close()

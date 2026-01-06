@@ -1,13 +1,11 @@
 import asyncio
 import logging
 
-import serial_asyncio
 from fastapi import APIRouter, HTTPException, status
 
 from ..config import HcuControllerConfig
-from .controller import HcuController
 from .messages import HcuMessage
-from .protocol import HcuProtocol
+from .monitor import HcuMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -15,27 +13,21 @@ logger = logging.getLogger(__name__)
 class HcuSkill:
     def __init__(self, config: HcuControllerConfig):
         self._config = config
-        self._hcu_controller = None
-        self._hcu_transport = None
-        self._hcu_protocol = None
+        self._hcu_monitor = None
+        self._monitor_task = None
 
     async def run(self) -> None:
-        self._hcu_controller = HcuController(self._config.shutdown_command, self._config.shutdown_delay_s)
+        self._hcu_monitor = HcuMonitor(self._config)
+        self._monitor_task = asyncio.create_task(self._hcu_monitor.run())
 
-        loop = asyncio.get_running_loop()
-        transport, protocol = await serial_asyncio.create_serial_connection(
-            loop,
-            lambda: HcuProtocol(controller=self._hcu_controller),
-            str(self._config.serial_device.absolute()),
-            baudrate=self._config.serial_baud_rate,
-        )
-        self._hcu_transport = transport
-        self._hcu_protocol = protocol
-
-        logger.info(f'Started HCU skill (on {self._config.serial_device.absolute()})')
+        logger.info(f'Started HCU skill')
 
     async def close(self):
-        self._hcu_transport.close()
+        self._monitor_task.cancel()
+        try:
+            await self._monitor_task
+        except asyncio.CancelledError:
+            pass
 
         logger.info('Stopped HCU skill')
 
