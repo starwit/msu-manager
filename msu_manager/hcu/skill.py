@@ -4,6 +4,7 @@ import logging
 from fastapi import APIRouter, HTTPException, status
 
 from ..config import HcuControllerConfig
+from .controller import HcuController
 from .messages import HcuMessage
 from .monitor import HcuMonitor
 
@@ -13,11 +14,13 @@ logger = logging.getLogger(__name__)
 class HcuSkill:
     def __init__(self, config: HcuControllerConfig):
         self._config = config
+        self._hcu_controller = None
         self._hcu_monitor = None
         self._monitor_task = None
 
     async def run(self) -> None:
-        self._hcu_monitor = HcuMonitor(self._config)
+        self._hcu_controller = HcuController(self._config.shutdown_command, self._config.shutdown_delay_s)
+        self._hcu_monitor = HcuMonitor(self._config, self._hcu_controller)
         self._monitor_task = asyncio.create_task(self._hcu_monitor.run())
 
         logger.info(f'Started HCU skill')

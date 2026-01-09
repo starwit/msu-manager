@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 import serial_asyncio
+from serial.serialutil import SerialException
 
 from ..config import HcuControllerConfig
 from .controller import HcuController
@@ -11,18 +12,18 @@ logger = logging.getLogger(__name__)
 
 
 class HcuMonitor:
-    def __init__(self, config: HcuControllerConfig):
+    def __init__(self, config: HcuControllerConfig, controller: HcuController):
         self._config = config
-        self._hcu_controller = None
+        self._hcu_controller = controller
         self._hcu_protocol = None
 
     async def run(self) -> None:
-        self._hcu_controller = HcuController(self._config.shutdown_command, self._config.shutdown_delay_s)
-
         while True:
             try:
                 if self._hcu_protocol is None or not self._hcu_protocol.is_connected:
                     await self._init_serial()
+            except SerialException as e:
+                logger.warning(f'Serial connection error: {e}')
             except:
                 logger.warning(f'Unexpected exception in HCU skill main loop', exc_info=True)
             finally:
