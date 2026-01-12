@@ -36,22 +36,28 @@ Protocol is composed of the following messages:
 
 ```json
 {
-    "command": "SHUTDOWN"
+    "type": "SHUTDOWN"
 }
 
 {
-    "command": "RESUME"
+    "type": "RESUME"
 }
 
 {
-    "command": "HEARTBEAT",
+    "type": "HEARTBEAT",
     "version" : "0.0.3"
 }
 
 {
-    "command": "LOG",
-    "key": "key",
-    "value": "value"
+    "type": "METRIC",
+    "key": "temp0",
+    "value": 0.123
+}
+
+{
+    "type": "LOG",
+    "level": "error",
+    "message": "log message..."
 }
 ```
 
