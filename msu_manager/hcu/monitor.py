@@ -24,7 +24,7 @@ class HcuMonitor:
                     await self._init_serial()
             except SerialException as e:
                 logger.warning(f'Serial connection error: {e}')
-            except:
+            except Exception:
                 logger.warning(f'Unexpected exception in HCU skill main loop', exc_info=True)
             finally:
                 await asyncio.sleep(2)

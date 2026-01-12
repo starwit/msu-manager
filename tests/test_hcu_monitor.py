@@ -20,6 +20,7 @@ async def write_serial_input(unused_tcp_port):
     await asyncio.start_server(connect_cb, '127.0.0.1', unused_tcp_port)
 
     async def writer(data: bytes):
+        assert dummy_writer is not None, 'You need to make sure the serial connection is established before calling write_serial_input()'
         dummy_writer.write(data)
         await dummy_writer.drain()
 

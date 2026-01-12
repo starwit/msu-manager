@@ -30,6 +30,7 @@ class HcuSkill:
         try:
             await self._monitor_task
         except asyncio.CancelledError:
+            # Task cancellation is expected during shutdown; suppress the exception.
             pass
 
         logger.info('Stopped HCU skill')
