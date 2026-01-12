@@ -57,8 +57,9 @@ apt update && apt install -y /app/msu-manager_0.0.7_all.deb
 ```
 You can however test, if everything is installed to the right place. If you want to test service use the following examples:
 ```bash
-curl localhost:8000/api/hcu/command -H "Content-Type: application/json" -d '{"command": "HEARTBEAT","version" : "0.0.3"}'
-curl localhost:8000/api/hcu/command -H "Content-Type: application/json" -d '{"command": "LOG", "key": "temperature", "value": "42.0"}'
-curl localhost:8000/api/hcu/command -H "Content-Type: application/json" -d '{"command": "SHUTDOWN"}'
-curl localhost:8000/api/hcu/command -H "Content-Type: application/json" -d '{"command": "RESUME"}'
+curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"type": "HEARTBEAT","version" : "0.0.3"}'
+curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"type": "LOG", "level": "info", "message": "temperature was read"}'
+curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"type": "METRIC", "key": "temp0", "value": "42.0"}'
+curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"type": "SHUTDOWN"}'
+curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"type": "RESUME"}'
 ```

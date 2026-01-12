@@ -6,8 +6,8 @@ from typing import List
 from prometheus_client import Enum, Gauge, Summary
 
 from ..command import run_command
-from .messages import (HcuMessage, HeartbeatCommand, LogCommand, ResumeCommand,
-                       ShutdownCommand)
+from .messages import (HcuMessage, HeartbeatMessage, LogMessage, MetricMessage,
+                       ResumeMessage, ShutdownMessage)
 
 logger = logging.getLogger(__name__)
 
@@ -24,17 +24,19 @@ class HcuController:
         self._last_heartbeat_time = time.time()
         IGNITION_STATE_ENUM.state('unknown')
 
-    async def process_command(self, command: HcuMessage):
-        logger.debug(f'Processing {type(command).__name__}')
-        match command:
-            case ShutdownCommand():
+    async def process_message(self, message: HcuMessage):
+        logger.debug(f'Processing {type(message).__name__}')
+        match message:
+            case ShutdownMessage():
                 await self.handle_shutdown()
-            case ResumeCommand():
+            case ResumeMessage():
                 await self.handle_resume()
-            case HeartbeatCommand():
+            case HeartbeatMessage():
                 self._handle_heartbeat()
-            case LogCommand():
-                self._handle_log(command)
+            case LogMessage():
+                self._handle_log(message)
+            case MetricMessage():
+                self._handle_metric(message)
                 
     async def handle_shutdown(self):
         IGNITION_STATE_ENUM.state('off')
@@ -85,10 +87,13 @@ class HcuController:
         TIME_SINCE_LAST_HEARTBEAT_SUMMARY.observe(current_time - self._last_heartbeat_time)
         self._last_heartbeat_time = current_time        
 
-    def _handle_log(self, command: LogCommand):
-        logger.info(f'LOG - {command.key}: {command.value}')
-        if self._is_number(command.value):
-            NUMERIC_LOG_GAUGE.labels(command.key).set(float(command.value))
+    def _handle_log(self, message: LogMessage):
+        logger.info(f'LOG - {message.level}: {message.message}')
+
+    def _handle_metric(self, message: MetricMessage):
+        logger.info(f'METRIC - {message.key}: {message.value}')
+        if self._is_number(message.value):
+            NUMERIC_LOG_GAUGE.labels(message.key).set(float(message.value))
         
     def _is_number(self, value: str) -> bool:
         try:

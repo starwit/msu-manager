@@ -51,7 +51,7 @@ Protocol is composed of the following messages:
 {
     "type": "METRIC",
     "key": "temp0",
-    "value": 0.123
+    "value": "0.123"
 }
 
 {

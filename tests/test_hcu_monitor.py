@@ -50,7 +50,7 @@ async def test_shutdown(tmp_path, serial_device_path_mock, write_serial_input):
 
     await hcu_skill.run()
     await asyncio.sleep(0.2)
-    await write_serial_input(b'{"command":"SHUTDOWN"}\n')
+    await write_serial_input(b'{"type":"SHUTDOWN"}\n')
     await asyncio.sleep(0.2)
     assert not tmp_file.exists()
     await asyncio.sleep(1)
@@ -72,9 +72,9 @@ async def test_resume(tmp_path, serial_device_path_mock, write_serial_input):
 
     await hcu_skill.run()
     await asyncio.sleep(0.2)
-    await write_serial_input(b'{"command":"SHUTDOWN"}\n')
+    await write_serial_input(b'{"type":"SHUTDOWN"}\n')
     await asyncio.sleep(0.2)
-    await write_serial_input(b'{"command":"RESUME"}\n')
+    await write_serial_input(b'{"type":"RESUME"}\n')
     await asyncio.sleep(1)
     assert not tmp_file.exists()
 

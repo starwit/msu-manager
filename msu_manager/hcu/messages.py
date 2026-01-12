@@ -4,28 +4,35 @@ from typing import Annotated, Literal, Union
 from pydantic import BaseModel, Field, TypeAdapter
 
 
-class CommandType(StrEnum):
+class MessageType(StrEnum):
     SHUTDOWN = "SHUTDOWN"
     RESUME = "RESUME"
     HEARTBEAT = "HEARTBEAT"
     LOG = "LOG"
+    METRIC = "METRIC"
 
 
-class ShutdownCommand(BaseModel):
-    command: Literal[CommandType.SHUTDOWN]
+class ShutdownMessage(BaseModel):
+    type: Literal[MessageType.SHUTDOWN]
 
 
-class ResumeCommand(BaseModel):
-    command: Literal[CommandType.RESUME]
+class ResumeMessage(BaseModel):
+    type: Literal[MessageType.RESUME]
 
 
-class HeartbeatCommand(BaseModel):
-    command: Literal[CommandType.HEARTBEAT]
+class HeartbeatMessage(BaseModel):
+    type: Literal[MessageType.HEARTBEAT]
     version: str | None = None
 
 
-class LogCommand(BaseModel):
-    command: Literal[CommandType.LOG]
+class LogMessage(BaseModel):
+    type: Literal[MessageType.LOG]
+    level: str
+    message: str
+
+
+class MetricMessage(BaseModel):
+    type: Literal[MessageType.METRIC]
     key: str
     value: str
 
@@ -33,12 +40,13 @@ class LogCommand(BaseModel):
 # Discriminated union using the 'command' field
 HcuMessage = Annotated[
     Union[
-        ShutdownCommand,
-        ResumeCommand,
-        HeartbeatCommand,
-        LogCommand
+        ShutdownMessage,
+        ResumeMessage,
+        HeartbeatMessage,
+        LogMessage,
+        MetricMessage,
     ],
-    Field(discriminator='command')
+    Field(discriminator='type')
 ]
 
 
