@@ -1,0 +1,84 @@
+from ..config import PingConfig
+from ..command import run_command
+import logging
+import re
+from prometheus_client import Histogram
+from typing import NamedTuple
+
+PING_ROUNDTRIP_HISTOGRAM = Histogram('ping_roundtrip_histogram', 'Roundtrip time in seconds as reported by ping',
+                                     buckets=(0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75))
+
+
+logger = logging.getLogger(__name__)
+
+class PingResult(NamedTuple):
+    packets_transmitted: int
+    packets_received: int
+    rtt_min: float
+    rtt_avg: float
+    rtt_max: float
+    rtt_mdev: float
+
+
+class Ping:
+    def __init__(self, config: PingConfig):
+        self._cmd = [
+            'ping',
+            '-n',
+            '-c', config.count,
+            '-w', config.deadline_s,
+            '-i', config.interval_s,
+            *(['-I', config.interface] if config.interface else []),
+            config.target,
+        ]
+
+    async def check(self) -> bool:
+        ret_code, stdout, stderr = await run_command(self._cmd)
+
+        if ret_code != 0:
+            logger.error(f'Connection check failed ({" ".join(self._cmd)})')
+            logger.error(f"STDOUT:")
+            logger.error(f"{stdout}")
+            logger.error(f"STDERR:")
+            logger.error(f"{stderr}")
+            return False
+
+        result = self._parse_ping_output(stdout)
+        if result is None:
+            return False
+        
+        PING_ROUNDTRIP_HISTOGRAM.observe(result.rtt_avg)
+
+        if ret_code == 0:
+            return True
+        else:
+            return False
+        
+    def _parse_ping_output(self, output: str) -> PingResult | None:
+        # Parse packet statistics: "2 packets transmitted, 2 received, ..."
+        packets_match = re.search(r'(\d+)\s+packets transmitted,\s+(\d+)\s+received', output)
+        if not packets_match:
+            logger.error(f'Error parsing ping output: {output}')
+            return None
+        
+        packets_transmitted = int(packets_match.group(1))
+        packets_received = int(packets_match.group(2))
+        
+        # Parse RTT statistics (optional): "rtt min/avg/max/mdev = 10.960/12.434/13.909/1.474 ms"
+        rtt_match = re.search(r'rtt min/avg/max/mdev = ([\d.]+)/([\d.]+)/([\d.]+)/([\d.]+)', output)
+        if rtt_match:
+            rtt_min = float(rtt_match.group(1))
+            rtt_avg = float(rtt_match.group(2))
+            rtt_max = float(rtt_match.group(3))
+            rtt_mdev = float(rtt_match.group(4))
+        else:
+            rtt_min = rtt_avg = rtt_max = rtt_mdev = 0.0
+        
+        return PingResult(
+            packets_transmitted=packets_transmitted,
+            packets_received=packets_received,
+            rtt_min=rtt_min,
+            rtt_avg=rtt_avg,
+            rtt_max=rtt_max,
+            rtt_mdev=rtt_mdev
+        )

@@ -16,14 +16,21 @@ class LogLevel(str, Enum):
     DEBUG = 'DEBUG'
 
 
+class PingConfig(BaseModel):
+    target: str
+    interface: Optional[str] = None
+    count: int = 3
+    deadline_s: int = 1
+    interval_s: float = 0.2
+    
+
 class UplinkMonitorConfig(BaseModel):
     enabled: Literal[True]
     restore_connection_cmd: List[str]
     wwan_device: str
     wwan_apn: str
-    check_connection_target: str
-    check_connection_device: str = None
     check_interval_s: int = 10
+    ping: PingConfig
 
 
 class UplinkMonitorConfigDisabled(BaseModel):

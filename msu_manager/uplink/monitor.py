@@ -1,9 +1,10 @@
-
-import logging
 import asyncio
+import logging
 
 from ..command import run_command
 from ..config import UplinkMonitorConfig
+from .modem import TCL_IKE41VE1
+from .ping import Ping
 
 logger = logging.getLogger(__name__)
 
@@ -14,16 +15,10 @@ class UplinkMonitor:
             'WWAN_IFACE': config.wwan_device,
             'APN': config.wwan_apn,
         }
-        self._check_connection_cmd = [
-            'ping',
-            '-c', '3',
-            '-w', '1',
-            '-i', '0.2',
-            *(['-I', config.check_connection_device] if config.check_connection_device else []),
-            config.check_connection_target,
-        ]
         self._check_interval_s = config.check_interval_s
         self._is_up = False
+        self._ping = Ping(config.ping)
+        self._modem = TCL_IKE41VE1()
 
     @property
     def is_up(self):
@@ -32,7 +27,7 @@ class UplinkMonitor:
     async def run(self):
         try:
             while True:
-                self._is_up = await self.check_connection()
+                self._is_up = await self._ping.check()
                 logger.debug(f'Connection status: {"up" if self._is_up else "down"}')
                 if not self._is_up:
                     logger.warning("Connection is down, attempting to restore...")
@@ -47,30 +42,3 @@ class UplinkMonitor:
             raise
         except Exception as e:
             logger.error(f"Unexpected error occurred in UplinkMonitor", exc_info=True)
-
-    async def check_connection(self) -> bool:
-        ret_code, stdout, stderr = await run_command(self._check_connection_cmd)
-
-        if ret_code == 0:
-            return True
-        else:
-            logger.error(f'Connection check failed. Output of {" ".join(self._check_connection_cmd)}')
-            logger.error(f"STDOUT:")
-            logger.error(f"{stdout}")
-            logger.error(f"STDERR:")
-            logger.error(f"{stderr}")
-            return False
-
-    async def restore_connection(self) -> bool:
-        ret_code, stdout, stderr = await run_command(self._restore_connection_cmd, env=self._restore_connection_env)
-
-        if ret_code == 0:
-            return True
-        else:
-            logger.error(f"Failed to restore connection. Output of {' '.join(self._restore_connection_cmd)}")
-            logger.error(f"STDOUT:")
-            logger.error(f"{stdout}")
-            logger.error(f"STDERR:")
-            logger.error(f"{stderr}")
-            return False
-

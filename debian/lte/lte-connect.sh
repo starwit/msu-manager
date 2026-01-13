@@ -22,12 +22,6 @@ main() {
 
     echo "=== LTE Connect Script ==="
 
-    # Check if we already have a connection
-    if check_connection; then
-        echo "Already connected, exiting"
-        exit 0
-    fi
-
     if ! wait_for_modem_hardware; then
         echo "Failed to detect modem, trying to restart ModemManager"
         restart_modemmanager
@@ -38,7 +32,7 @@ main() {
     fi
 
     echo "Trying simple-connect"
-    if connect_bearer && set_up_network_interface && check_connection; then
+    if connect_bearer && set_up_network_interface; then
         echo "Connection successful, exiting"
         exit 0
     fi
@@ -63,24 +57,13 @@ main() {
         exit 1
     fi
 
-    if connect_bearer && set_up_network_interface && check_connection; then
+    if connect_bearer && set_up_network_interface; then
         echo "Connection successful, exiting"
         exit 0
     else
         echo "Connection finally failed, exiting"
         mmcli -m any
         exit 1
-    fi
-}
-
-check_connection() {
-    echo "Checking connection on $WWAN_IFACE"
-    if ping -c 3 -w 1 -i 0.2 -I $WWAN_IFACE 1.1.1.1 >/dev/null; then
-        echo "Connection check successful! ✅"
-        return 0
-    else
-        echo "Connection check failed! ❌"
-        return 1
     fi
 }
 
