@@ -27,9 +27,9 @@ class Ping:
         self._cmd = [
             'ping',
             '-n',
-            '-c', '3',
-            '-w', '1',
-            '-i', '0.2',
+            '-c', str(config.count),
+            '-w', str(config.deadline_s),
+            '-i', str(config.interval_s),
             *(['-I', config.interface] if config.interface else []),
             config.target,
         ]
