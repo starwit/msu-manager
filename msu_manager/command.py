@@ -1,11 +1,15 @@
 import asyncio
 import logging
 import os
-from typing import Dict, List, Tuple
+from collections.abc import Iterable
+from typing import Dict, Tuple
 
 logger = logging.getLogger(__name__)
 
-async def run_command(command: List[str], env: Dict[str, str] = None) -> Tuple[int, str, str]:
+async def run_command(command: Iterable[str], env: Dict[str, str] = None, log_cmd: bool = False, log_err: bool = False, raise_on_fail: bool = False) -> Tuple[int, str, str]:
+    if log_cmd:
+        logger.info(f'Running command: {" ".join(command)} with env: {env}')
+    
     proc = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,
@@ -21,5 +25,15 @@ async def run_command(command: List[str], env: Dict[str, str] = None) -> Tuple[i
     logger.debug(f"{stdout}")
     logger.debug(f"STDERR:")
     logger.debug(f"{stderr}")
+
+    if log_err and proc.returncode != 0:
+        logger.error(f'Error running ({" ".join(command)})')
+        logger.error(f"STDOUT:")
+        logger.error(f"{stdout}")
+        logger.error(f"STDERR:")
+        logger.error(f"{stderr}")
+
+    if raise_on_fail and proc.returncode != 0:
+        raise IOError(f'Failed running ({" ".join(command)})', f'STDOUT: {stdout.replace("\n", "; ")}', f'STDERR: {stderr.replace("\n", "; ")}')
 
     return proc.returncode, stdout, stderr
