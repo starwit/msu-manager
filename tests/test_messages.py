@@ -7,21 +7,21 @@ from msu_manager.hcu.messages import (HeartbeatMessage, LogMessage,
                                       validate_python_message)
 
 
-def test_shutdown_command_parsing():
+def test_shutdown_message_parsing():
     m = validate_python_message({
         'type': 'SHUTDOWN' 
     })
     assert isinstance(m, ShutdownMessage)
     assert m.type == 'SHUTDOWN'
 
-def test_resume_command_parsing():
+def test_resume_message_parsing():
     m = validate_python_message({
         'type': 'RESUME' 
     })
     assert isinstance(m, ResumeMessage)
     assert m.type == 'RESUME'
 
-def test_heartbeat_command_parsing():
+def test_heartbeat_message_parsing():
     m = validate_python_message({
         'type': 'HEARTBEAT',
         'version': '1.0.0'
@@ -30,7 +30,7 @@ def test_heartbeat_command_parsing():
     assert m.type == 'HEARTBEAT'
     assert m.version == '1.0.0'
 
-def test_log_command_parsing():
+def test_log_message_parsing():
     m = validate_python_message({
         'type': 'LOG',
         'level': 'info',
@@ -41,10 +41,20 @@ def test_log_command_parsing():
     assert m.level == 'info'
     assert m.message == 'test_message'
 
-def test_invalid_command_parsing():
+def test_metric_message_parsing():
+    m = validate_python_message({
+        'type': 'METRIC',
+        'key': 'cpu_usage',
+        'value': '75.5'
+    })
+    assert m.type == 'METRIC'
+    assert m.key == 'cpu_usage'
+    assert m.value == '75.5'
+
+def test_invalid_message_parsing():
     with pytest.raises(ValidationError):
         validate_python_message({
-            'type': 'invalid_command'
+            'type': 'invalid_message'
         })
 
 def test_json_parsing():
