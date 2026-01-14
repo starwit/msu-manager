@@ -24,7 +24,7 @@ class PingResult(NamedTuple):
 
 class Ping:
     def __init__(self, config: PingConfig):
-        self._cmd = [
+        self._ping_cmd = [
             'ping',
             '-n',
             '-c', str(config.count),
@@ -35,11 +35,11 @@ class Ping:
         ]
 
     async def check(self) -> bool:
-        _, stdout, stderr = await run_command(self._cmd)
+        _, stdout, stderr = await run_command(self._ping_cmd, {'LC_ALL': 'C'})
         
         result = self._parse_ping_output(stdout)
         if result is None:
-            logger.error(f'Parsing ping output failed ({" ".join(self._cmd)})')
+            logger.error(f'Parsing ping output failed ({" ".join(self._ping_cmd)})')
             logger.error(f"STDOUT:")
             logger.error(f"{stdout}")
             logger.error(f"STDERR:")
