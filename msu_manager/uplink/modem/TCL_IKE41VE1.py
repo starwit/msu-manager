@@ -1,13 +1,13 @@
-from msu_manager.config import PingConfig
-from ..ping import Ping
-import logging
-from ...command import run_command
 import asyncio
-from enum import Enum
-from typing import Awaitable, Callable, Dict, List, Optional, Tuple, Any
 import json
+import logging
 from collections.abc import Iterable
+from enum import Enum
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
 
+from ...command import run_command
+from ...config import PingConfig
+from ..ping import Ping
 
 logger = logging.getLogger(__name__)
 
@@ -289,15 +289,3 @@ class TCL_IKE41VE1:
         if ret_code == 0:
             logger.info(f'Modem status:\n{stdout}')
     
-if __name__ == '__main__':
-    # Run script standalone for testing
-    import asyncio
-
-    async def main():
-        ping = Ping(PingConfig(
-            target='1.1.1.1',
-        ))
-        modem = TCL_IKE41VE1(ping)
-        await modem.reconnect()
-
-    asyncio.run(main())
