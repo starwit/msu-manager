@@ -37,7 +37,7 @@ class MetricMessage(BaseModel):
     value: str
 
 
-# Discriminated union using the 'command' field
+# Discriminated union using the 'type' field
 HcuMessage = Annotated[
     Union[
         ShutdownMessage,
