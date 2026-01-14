@@ -5,6 +5,7 @@ from typing import List
 
 from prometheus_client import Enum, Gauge, Summary
 
+from ..command import run_command
 from .messages import (HcuMessage, HeartbeatCommand, LogCommand, ResumeCommand,
                        ShutdownCommand)
 
@@ -24,7 +25,7 @@ class HcuController:
         IGNITION_STATE_ENUM.state('unknown')
 
     async def process_command(self, command: HcuMessage):
-        logger.info(f'Processing {type(command).__name__}')
+        logger.debug(f'Processing {type(command).__name__}')
         match command:
             case ShutdownCommand():
                 await self.handle_shutdown()
@@ -70,16 +71,13 @@ class HcuController:
         await asyncio.sleep(self.shutdown_delay_s)
         
         logger.info('Executing shutdown now.')
-        proc = await asyncio.create_subprocess_exec(*self.shutdown_command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await proc.communicate()
+        retcode, stdout, stderr = await run_command(self.shutdown_command)
 
         # This is probably never reached if shutdown is successful
-        if proc.returncode != 0:
-            logger.error(f'Shutdown command failed with exit code {proc.returncode}')
-            if stdout:
-                logger.error(f'[stdout]\n{stdout.decode()}')
-            if stderr:
-                logger.error(f'[stderr]\n{stderr.decode()}')
+        if retcode != 0:
+            logger.error(f'Shutdown command failed with exit code {retcode}')
+            logger.error(f'[stdout]\n{stdout.decode()}')
+            logger.error(f'[stderr]\n{stderr.decode()}')
             await self._cancel_shutdown()
 
     def _handle_heartbeat(self):

@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from pathlib import Path
 from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
@@ -31,8 +32,8 @@ class UplinkMonitorConfigDisabled(BaseModel):
 
 class HcuControllerConfig(BaseModel):
     enabled: Literal[True]
-    udp_bind_address: str = '0.0.0.0'
-    udp_listen_port: int = 8001
+    serial_device: Path
+    serial_baud_rate: int
     shutdown_delay_s: int = 180
     shutdown_command: List[str]
 
