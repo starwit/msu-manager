@@ -18,7 +18,7 @@ class UplinkMonitor:
         self._check_interval_s = config.check_interval_s
         self._is_up = False
         self._ping = Ping(config.ping)
-        self._modem = TCL_IKE41VE1()
+        self._modem = TCL_IKE41VE1(self._ping)
 
     @property
     def is_up(self):
@@ -31,7 +31,8 @@ class UplinkMonitor:
                 logger.debug(f'Connection status: {"up" if self._is_up else "down"}')
                 if not self._is_up:
                     logger.warning("Connection is down, attempting to restore...")
-                    success = await self.restore_connection()
+                    await self._modem.reconnect()
+                    success = await self._ping.check()
                     if success:
                         logger.info("Connection restored successfully.")
                     else:
