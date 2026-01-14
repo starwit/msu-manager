@@ -12,7 +12,7 @@ from .messages import (HcuMessage, HeartbeatMessage, LogMessage, MetricMessage,
 logger = logging.getLogger(__name__)
 
 TIME_SINCE_LAST_HEARTBEAT_SUMMARY = Summary('hcu_time_since_last_heartbeat', 'Tracks time intervals between HCU heartbeats')
-NUMERIC_LOG_GAUGE = Gauge('hcu_log', 'Tracks numeric HCU log event values', ['key'])
+METRIC_GAUGE = Gauge('hcu_metric', 'Tracks numeric HCU METRIC event values', ['key'])
 IGNITION_STATE_ENUM = Enum('hcu_ignition_state', 'Ignition state of the vehicle as reported by the HCU', states=['on', 'off', 'unknown'])
 
 
@@ -93,7 +93,7 @@ class HcuController:
     def _handle_metric(self, message: MetricMessage):
         logger.debug(f'METRIC - {message.key}: {message.value}')
         if self._is_number(message.value):
-            NUMERIC_LOG_GAUGE.labels(message.key).set(float(message.value))
+            METRIC_GAUGE.labels(message.key).set(float(message.value))
         
     def _is_number(self, value: str) -> bool:
         try:
