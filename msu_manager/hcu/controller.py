@@ -78,8 +78,8 @@ class HcuController:
         # This is probably never reached if shutdown is successful
         if retcode != 0:
             logger.error(f'Shutdown command failed with exit code {retcode}')
-            logger.error(f'[stdout]\n{stdout.decode()}')
-            logger.error(f'[stderr]\n{stderr.decode()}')
+            logger.error(f'[stdout]\n{stdout}')
+            logger.error(f'[stderr]\n{stderr}')
             await self._cancel_shutdown()
 
     def _handle_heartbeat(self):
@@ -88,10 +88,10 @@ class HcuController:
         self._last_heartbeat_time = current_time        
 
     def _handle_log(self, message: LogMessage):
-        logger.info(f'LOG - {message.level}: {message.message}')
+        logger.debug(f'LOG - {message.level}: {message.message}')
 
     def _handle_metric(self, message: MetricMessage):
-        logger.info(f'METRIC - {message.key}: {message.value}')
+        logger.debug(f'METRIC - {message.key}: {message.value}')
         if self._is_number(message.value):
             NUMERIC_LOG_GAUGE.labels(message.key).set(float(message.value))
         

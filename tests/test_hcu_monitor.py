@@ -79,3 +79,22 @@ async def test_resume(tmp_path, serial_device_path_mock, write_serial_input):
     assert not tmp_file.exists()
 
     await hcu_skill.close()
+
+@pytest.mark.asyncio
+async def test_shutdown_failing(serial_device_path_mock, write_serial_input):
+    hcu_skill = HcuSkill(HcuControllerConfig(
+        enabled=True,
+        serial_device=serial_device_path_mock,
+        serial_baud_rate=9600,
+        shutdown_command=['false'],
+        shutdown_delay_s=0
+    ))
+
+    await hcu_skill.run()
+    await asyncio.sleep(0.2)
+    await write_serial_input(b'{"type":"SHUTDOWN"}\n')
+    await asyncio.sleep(0.2)
+
+    await hcu_skill.close()
+
+
