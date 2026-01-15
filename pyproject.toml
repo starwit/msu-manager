@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "msu-manager"
-version = "1.0.2"
+version = "2.0.0"
 package-mode = false
 description = "MSU management component"
 authors = ["ztarbug <foss@starwit.de>"]
