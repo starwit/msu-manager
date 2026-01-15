@@ -2,7 +2,7 @@ log_level: INFO
 hcu_controller:
   enabled: true
   serial_device: /dev/ttyUSB0                                                       # Path to the serial device file attached to the HCU serial connection
-  serial_baud_rate: 9600
+  serial_baud_rate: 115200
   shutdown_delay_s: 180                                                             # Delay after having received SHUTDOWN command to executing shutdown (in seconds)
   shutdown_command: ['sudo', 'shutdown', '-h', 'now']                               # Don't accidentally shut down your computer and use a dummy command like "touch /tmp/shutdown_called" for testing
 uplink_monitor:

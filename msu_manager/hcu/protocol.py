@@ -26,23 +26,23 @@ class HcuProtocol(asyncio.Protocol):
         self._buffer += data.decode(encoding='ascii', errors='ignore')
 
         while '\n' in self._buffer:
-            logger.debug(f'Received raw command from HCU')
-            raw_command, self._buffer = self._buffer.split('\n', maxsplit=1)
-            self._process_command(raw_command)
+            logger.debug(f'Received raw message from HCU')
+            raw_message, self._buffer = self._buffer.split('\n', maxsplit=1)
+            self._process_message(raw_message)
 
-    def _process_command(self, command: str) -> None:
+    def _process_message(self, message: str) -> None:
         try:
-            json_dict = json.loads(command.strip())
+            json_dict = json.loads(message.strip())
         except (UnicodeDecodeError, JSONDecodeError):
-            logger.error(f'Failed to parse JSON command from HCU: {command.strip()}')
+            logger.error(f'Failed to parse JSON message from HCU: {message.strip()}')
             logger.debug(f'Decode error', exc_info=True)
             return
         
-        command = validate_python_message(json_dict)
-        logger.debug(f'Received {type(command).__name__} from HCU: {command.model_dump_json(indent=2)}')
+        message_obj = validate_python_message(json_dict)
+        logger.debug(f'Received {type(message_obj).__name__} from HCU: {message_obj.model_dump_json(indent=2)}')
 
         if self._controller:
-            asyncio.create_task(self._controller.process_command(command))
+            asyncio.create_task(self._controller.process_message(message_obj))
 
     @property
     def is_connected(self) -> bool:

@@ -37,11 +37,11 @@ class HcuSkill:
 
     def add_routes(self, router: APIRouter) -> None:
 
-        @router.post('/command', status_code=status.HTTP_204_NO_CONTENT, responses={404: {}})
-        async def command_endpoint(command: HcuMessage):
-            logger.info(f'Received {type(command).__name__} via HTTP: {command.model_dump_json(indent=2)}')
+        @router.post('/message', status_code=status.HTTP_204_NO_CONTENT, responses={404: {}})
+        async def message_endpoint(message: HcuMessage):
+            logger.info(f'Received {type(message).__name__} via HTTP: {message.model_dump_json(indent=2)}')
             if not self._config.enabled:
-                logger.warning('HcuController is disabled; ignoring command')
+                logger.warning('HcuController is disabled; ignoring message')
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='HcuController is disabled')
 
-            await self._hcu_controller.process_command(command)
+            await self._hcu_controller.process_message(message)

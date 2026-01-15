@@ -6,13 +6,13 @@ from typing import List
 from prometheus_client import Enum, Gauge, Summary
 
 from ..command import run_command
-from .messages import (HcuMessage, HeartbeatCommand, LogCommand, ResumeCommand,
-                       ShutdownCommand)
+from .messages import (HcuMessage, HeartbeatMessage, LogMessage, MetricMessage,
+                       ResumeMessage, ShutdownMessage)
 
 logger = logging.getLogger(__name__)
 
 TIME_SINCE_LAST_HEARTBEAT_SUMMARY = Summary('hcu_time_since_last_heartbeat', 'Tracks time intervals between HCU heartbeats')
-NUMERIC_LOG_GAUGE = Gauge('hcu_log', 'Tracks numeric HCU log event values', ['key'])
+METRIC_GAUGE = Gauge('hcu_metric', 'Tracks numeric HCU METRIC event values', ['key'])
 IGNITION_STATE_ENUM = Enum('hcu_ignition_state', 'Ignition state of the vehicle as reported by the HCU', states=['on', 'off', 'unknown'])
 
 
@@ -24,17 +24,19 @@ class HcuController:
         self._last_heartbeat_time = time.time()
         IGNITION_STATE_ENUM.state('unknown')
 
-    async def process_command(self, command: HcuMessage):
-        logger.debug(f'Processing {type(command).__name__}')
-        match command:
-            case ShutdownCommand():
+    async def process_message(self, message: HcuMessage):
+        logger.debug(f'Processing {type(message).__name__}')
+        match message:
+            case ShutdownMessage():
                 await self.handle_shutdown()
-            case ResumeCommand():
+            case ResumeMessage():
                 await self.handle_resume()
-            case HeartbeatCommand():
+            case HeartbeatMessage():
                 self._handle_heartbeat()
-            case LogCommand():
-                self._handle_log(command)
+            case LogMessage():
+                self._handle_log(message)
+            case MetricMessage():
+                self._handle_metric(message)
                 
     async def handle_shutdown(self):
         IGNITION_STATE_ENUM.state('off')
@@ -76,8 +78,8 @@ class HcuController:
         # This is probably never reached if shutdown is successful
         if retcode != 0:
             logger.error(f'Shutdown command failed with exit code {retcode}')
-            logger.error(f'[stdout]\n{stdout.decode()}')
-            logger.error(f'[stderr]\n{stderr.decode()}')
+            logger.error(f'[stdout]\n{stdout}')
+            logger.error(f'[stderr]\n{stderr}')
             await self._cancel_shutdown()
 
     def _handle_heartbeat(self):
@@ -85,10 +87,13 @@ class HcuController:
         TIME_SINCE_LAST_HEARTBEAT_SUMMARY.observe(current_time - self._last_heartbeat_time)
         self._last_heartbeat_time = current_time        
 
-    def _handle_log(self, command: LogCommand):
-        logger.info(f'LOG - {command.key}: {command.value}')
-        if self._is_number(command.value):
-            NUMERIC_LOG_GAUGE.labels(command.key).set(float(command.value))
+    def _handle_log(self, message: LogMessage):
+        logger.debug(f'LOG - {message.level}: {message.message}')
+
+    def _handle_metric(self, message: MetricMessage):
+        logger.debug(f'METRIC - {message.key}: {message.value}')
+        if self._is_number(message.value):
+            METRIC_GAUGE.labels(message.key).set(float(message.value))
         
     def _is_number(self, value: str) -> bool:
         try:
