@@ -23,7 +23,7 @@ jobs:
     name: create new release
     runs-on: [self-hosted, linux, X64]
     container:
-      image: starwitorg/debian-packaging:0.0.3
+      image: starwitorg/debian-packaging:0.0.6
       volumes:
         - /home/githubrunner/.cache/pypoetry:/root/.cache/pypoetry
       env:
