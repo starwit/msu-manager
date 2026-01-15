@@ -3,7 +3,7 @@ from textwrap import dedent
 import pytest
 
 from msu_manager.config import PingConfig
-from msu_manager.uplink.ping import Ping
+from msu_manager.uplink.status import Ping
 
 
 @pytest.fixture

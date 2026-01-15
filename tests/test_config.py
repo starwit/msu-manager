@@ -16,7 +16,9 @@ def test_full_config():
             "restore_connection_cmd": ["echo", "Restoring connection"],
             "wwan_device": "test_wwan",
             "wwan_apn": "test_apn",
-            "check_connection_target": "1.1.1.1",
+            "ping" : {
+                "target": "1.1.1.1"                                      
+            },
             "check_connection_device": "eth0",
             "check_interval_s": 10
         },

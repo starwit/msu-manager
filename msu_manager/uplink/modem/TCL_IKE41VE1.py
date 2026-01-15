@@ -3,11 +3,10 @@ import json
 import logging
 from collections.abc import Iterable
 from enum import Enum
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
+from typing import Any, Awaitable, Callable, Optional
 
 from ...command import run_command
-from ...config import PingConfig
-from ..ping import Ping
+from ..status import Ping
 
 logger = logging.getLogger(__name__)
 

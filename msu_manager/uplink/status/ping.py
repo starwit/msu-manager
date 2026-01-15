@@ -4,14 +4,15 @@ from typing import NamedTuple
 
 from prometheus_client import Histogram
 
-from ..command import run_command
-from ..config import PingConfig
+from ...command import run_command
+from ...config import PingConfig
 
-PING_ROUNDTRIP_HISTOGRAM = Histogram('ping_roundtrip_histogram', 'Roundtrip time in milliseconds as reported by ping',
+PING_ROUNDTRIP_HISTOGRAM = Histogram('uplink_ping_roundtrip', 'Roundtrip time in milliseconds as reported by ping',
                                      buckets=(5, 10, 25, 50, 75, 100, 250, 500, 750))
 
 
 logger = logging.getLogger(__name__)
+
 
 class PingResult(NamedTuple):
     packets_transmitted: int

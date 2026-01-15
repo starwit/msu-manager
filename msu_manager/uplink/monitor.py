@@ -3,8 +3,8 @@ import logging
 
 from ..command import run_command
 from ..config import UplinkMonitorConfig
-from .modem import TCL_IKE41VE1
-from .ping import Ping
+from .modem import TCL_IKE41VE1, DummyModem
+from .status import Ping
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,8 @@ class UplinkMonitor:
         self._check_interval_s = config.check_interval_s
         self._is_up = False
         self._ping = Ping(config.ping)
-        self._modem = TCL_IKE41VE1(self._ping)
+        self._modem = DummyModem()
+        # self._modem = TCL_IKE41VE1(self._ping)
 
     @property
     def is_up(self):

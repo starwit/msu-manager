@@ -3,7 +3,7 @@ import pytest
 
 from msu_manager.config import PingConfig
 from msu_manager.uplink.modem.TCL_IKE41VE1 import TCL_IKE41VE1
-from msu_manager.uplink.ping import Ping
+from msu_manager.uplink.status import Ping
 
 
 @pytest.mark.asyncio

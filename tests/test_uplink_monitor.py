@@ -2,7 +2,7 @@ from typing import Dict, List
 import pytest
 import asyncio
 from unittest.mock import AsyncMock
-from msu_manager.config import UplinkMonitorConfig
+from msu_manager.config import UplinkMonitorConfig, PingConfig
 from msu_manager.uplink.monitor import UplinkMonitor
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def uplink_monitor():
             restore_connection_cmd=['./restore'],
             wwan_device='test_wwan',
             wwan_apn='test_apn',
-            check_connection_target='8.8.8.8',
+            ping=PingConfig(target='8.8.8.8'),
             check_interval_s=5
         )
     )
