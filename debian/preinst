@@ -5,6 +5,7 @@ mkdir -p /opt/msu-manager
 
 useradd -M msumanager
 usermod -L msumanager
+usermod -aG dialout msumanager
 
 mkdir -p /etc/sudoers.d
 
