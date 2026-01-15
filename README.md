@@ -63,3 +63,8 @@ curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"ty
 curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"type": "SHUTDOWN"}'
 curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"type": "RESUME"}'
 ```
+
+## Changelog
+
+### 2.0.1
+- APT: Fix msumanager user lacking permissions to access serial devices
