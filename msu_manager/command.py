@@ -37,3 +37,7 @@ async def run_command(command: Iterable[str], env: Dict[str, str] = None, log_cm
         raise IOError(f'Failed running ({" ".join(command)})', f'STDOUT: {stdout.replace("\n", "; ")}', f'STDERR: {stderr.replace("\n", "; ")}')
 
     return proc.returncode, stdout, stderr
+
+async def run_sudo_command(command: Iterable[str], env: Dict[str, str] = None, log_cmd: bool = False, log_err: bool = False, raise_on_fail: bool = False) -> Tuple[int, str, str]:
+    sudo_command = ['sudo', '-n'] + list(command)
+    return await run_command(sudo_command, env=env, log_cmd=log_cmd, log_err=log_err, raise_on_fail=raise_on_fail)

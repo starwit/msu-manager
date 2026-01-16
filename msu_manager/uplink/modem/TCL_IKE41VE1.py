@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from enum import Enum
 from typing import Any, Awaitable, Callable, Optional
 
-from ...command import run_command
+from ...command import run_command, run_sudo_command
 from ..status import Ping
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class TCL_IKE41VE1:
 
     async def _restart_modemmanager(self) -> None:
         logger.info('Restarting ModemManager.service')
-        await run_command(('sudo', '-n', 'systemctl', 'restart', 'ModemManager.service'), log_cmd=True, log_err=True)
+        await run_sudo_command(('systemctl', 'restart', 'ModemManager.service'), log_cmd=True, log_err=True)
     
     async def _connect_bearer(self) -> bool:
         modem_id = await self._get_modem_id()
@@ -86,7 +86,7 @@ class TCL_IKE41VE1:
         
         logger.info(f'Connecting to APN {self._apn} on modem {modem_id}...')
 
-        ret_code, _, _ = await run_command((
+        ret_code, _, _ = await run_sudo_command((
             'mmcli', '-m', str(modem_id),
             f'--simple-connect=apn={self._apn},ip-type=ipv4,allow-roaming=true'
         ), log_cmd=True)
@@ -113,7 +113,7 @@ class TCL_IKE41VE1:
         await self._log_modem_status()
         
         # Get bearer info
-        bearers = await self._get_modem_json_value('modem', 'generic', 'bearers')
+        bearers = await self._get_modem_json_value(('modem', 'generic', 'bearers'))
         if not bearers:
             logger.error('Failed to get bearers list')
             return False
@@ -146,15 +146,15 @@ class TCL_IKE41VE1:
         logger.info(f'Setting up {self._wwan_iface}...')
         
         # Configure interface
-        await run_command(('ip', 'addr', 'flush', 'dev', self._wwan_iface), log_cmd=True, raise_on_fail=True)
-        await run_command(('ip', 'link', 'set', self._wwan_iface, 'up'), log_cmd=True, raise_on_fail=True)
-        await run_command(('ip', 'addr', 'add', f'{bearer_ip}/{bearer_ip_prefix}', 'dev', self._wwan_iface), log_cmd=True, raise_on_fail=True)
+        await run_sudo_command(('ip', 'addr', 'flush', 'dev', self._wwan_iface), log_cmd=True, raise_on_fail=True)
+        await run_sudo_command(('ip', 'link', 'set', self._wwan_iface, 'up'), log_cmd=True, raise_on_fail=True)
+        await run_sudo_command(('ip', 'addr', 'add', f'{bearer_ip}/{bearer_ip_prefix}', 'dev', self._wwan_iface), log_cmd=True, raise_on_fail=True)
         
         logger.info('Setting DNS servers')
-        await run_command(('resolvectl', 'dns', self._wwan_iface, *bearer_dns_list), log_cmd=True, raise_on_fail=True)
+        await run_sudo_command(('resolvectl', 'dns', self._wwan_iface, *bearer_dns_list), log_cmd=True, raise_on_fail=True)
         
         logger.info('Setting default IP route')
-        await run_command(('ip', 'route', 'add', 'default', 'via', bearer_gw, 'metric', '500'), log_cmd=True, raise_on_fail=True)
+        await run_sudo_command(('ip', 'route', 'add', 'default', 'via', bearer_gw, 'metric', '500'), log_cmd=True, raise_on_fail=True)
         
         logger.info('Network interface configuration done')
         return True
@@ -169,14 +169,13 @@ class TCL_IKE41VE1:
         
         logger.info(f'Resetting modem via AT command on {at_port}')
         try:
-            with open(at_port, 'w') as f:
-                f.write('AT&F\r\n')
+            await run_command(('sh', '-c', f'echo -ne "AT&F\r\n" > {at_port}'), log_cmd=True, raise_on_fail=True)
         except Exception as e:
             raise RuntimeError(f'Failed to send reset command to modem: {e}')
 
     async def _wait_for_hardware(self, timeout_s=90) -> bool:
         logger.info(f'Waiting for ModemManager to pick up modem (timeout {timeout_s}s)')
-        await run_command(('mmcli', '-S'))
+        await run_sudo_command(('/usr/bin/mmcli', '-S'))
         
         async def detected():
             ret_code, _, _ = await run_command(('mmcli', '-m', 'any'))
