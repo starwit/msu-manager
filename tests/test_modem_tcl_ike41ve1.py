@@ -11,6 +11,7 @@ from msu_manager.uplink.status import Ping
 async def test_tcl_ike41ve1_modem_reconnect(request, caplog):
     caplog.set_level(logging.DEBUG)
     
+    # If you want to run this using the IDE, e.g. for debugging, please comment these lines
     if 'tests/test_modem_tcl_ike41ve1.py' not in request.config.args:
         pytest.skip("Skipping TCL IKE41VE1 modem tests (specify tests/test_modem_tcl_ike41ve1.py explicitly to enable)")
     
