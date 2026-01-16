@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 from collections.abc import Iterable
-from enum import Enum
 from typing import Any, Awaitable, Callable, Optional
 
 from ...command import run_command, run_sudo_command
@@ -12,16 +11,9 @@ logger = logging.getLogger(__name__)
 
 # Add dummy modem to config with configurable command or return value
 # Add configuration values for this one
-# How can we possibly test this?
-
-class ModemState(str, Enum):
-    REGISTERED = "registered"
-    ENABLED = "enabled"
-    CONNECTED = "connected"
-
 
 class TCL_IKE41VE1:
-    def __init__(self, ping: Ping, apn: str = "internet.telekom", wwan_iface: str = "wwan0"):
+    def __init__(self, ping: Ping, apn: str = "internet", wwan_iface: str = "wwan0"):
         self._ping = ping
         self._reboot_threshold_s = 300
         self._apn = apn
@@ -55,11 +47,6 @@ class TCL_IKE41VE1:
                 logger.error('Modem failed to register with the OS after reset')
                 await self._log_modem_status()
                 raise RuntimeError('Modem failed to register after reset')
-            
-            if not await self._wait_for_modem_ready():
-                logger.error('Modem failed to get ready')
-                await self._log_modem_status()
-                raise RuntimeError('Modem failed to get ready')
             
             # Try to connect again after reset
             if await self._connect_bearer() and await self._set_up_network_interface() and await self._check_connection():
@@ -167,11 +154,17 @@ class TCL_IKE41VE1:
         if not at_port:
             raise RuntimeError('Failed to get AT port for modem reset')
         
+        logger.info('Stopping ModemManager')
+        await run_sudo_command(('systemctl', 'stop', 'ModemManager.service'), log_err=True)
+        
         logger.info(f'Resetting modem via AT command on {at_port}')
         try:
-            await run_command(('sh', '-c', f'echo -ne "AT&F\r\n" > {at_port}'), log_cmd=True, raise_on_fail=True)
+            await run_command(('sh', '-c', f'echo -ne \"AT&F\r\n\" > {at_port}'), log_cmd=True, raise_on_fail=True)
         except Exception as e:
-            raise RuntimeError(f'Failed to send reset command to modem: {e}')
+            raise RuntimeError(f'Failed to send reset command to modem: {e}') from None
+
+        logger.info('Starting ModemManager')
+        await run_sudo_command(('systemctl', 'start', 'ModemManager.service'), log_err=True)
 
     async def _wait_for_hardware(self, timeout_s=90) -> bool:
         logger.info(f'Waiting for ModemManager to pick up modem (timeout {timeout_s}s)')
@@ -192,21 +185,12 @@ class TCL_IKE41VE1:
         
         return await self._wait_for_modem_condition(reset, timeout_s)
         
-    async def _wait_for_modem_ready(self, timeout_s=20) -> bool:
-        logger.info(f'Waiting for modem to be ready (timeout {timeout_s}s)')
-
-        async def ready():
-            state = await self._get_modem_state()
-            return state in [ModemState.REGISTERED, ModemState.ENABLED, ModemState.CONNECTED]
-        
-        return await self._wait_for_modem_condition(ready, timeout_s)
-        
     async def _wait_for_modem_connected(self, timeout_s=60) -> bool:
         logger.info(f'Waiting for modem to be connected (timeout {timeout_s}s)')
 
         async def connected():
             state = await self._get_modem_state()
-            return state == ModemState.CONNECTED
+            return state == 'connected'
         
         return await self._wait_for_modem_condition(connected, timeout_s)
     
