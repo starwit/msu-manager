@@ -7,12 +7,16 @@ hcu_controller:
   shutdown_command: ['sudo', 'shutdown', '-h', 'now']                               # Don't accidentally shut down your computer and use a dummy command like "touch /tmp/shutdown_called" for testing
 uplink_monitor:
   enabled: true
-  restore_connection_cmd: ["sudo", "/usr/bin/bash", "/usr/bin/lte-connect.sh"]      # Command to restore the connection (use a dummy command like "touch /tmp/restore_called" for testing)
-  wwan_device: 'wwan0'                                                              # WWAN interface name (see mmcli -m any and check System.ports, it's probably wwan0)
+  wwan_interface: 'wwan0'                                                           # WWAN interface name (see mmcli -m any and check System.ports, it's probably wwan0)
   wwan_apn: 'test.apn'                                                              # APN to use for the WWAN connection
-  check_connection_target: '1.1.1.1'                                                # Target to ping for connection checks
-  check_connection_device: 'wwan0'                                                  # Device to use for connection checks (should mostly be the same as wwan_device, null/unset means any uplink will do)
   check_interval_s: 10
+  ping:
+    target: '1.1.1.1'                                                               # Target to ping for connection checks
+  modem:
+    type: 'dummy'                                                                   # Choose the modem implementation
+  # modem:
+    # type: 'tcl_ike41ve1'
+    # reboot_threshold_s: 300                                                       # If connection could not be reestablished after some time, reboot the system as a last resort measure
 gps:
   enabled: true
   init_cmd: ['true']                                                                # Optional command to initialize GPS, e.g. set measurement rate ['ubxtool', '-p', 'CFG-RATE,200']

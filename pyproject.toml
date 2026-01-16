@@ -16,6 +16,7 @@ fastapi = {extras = ["standard"], version = "0.128.0"}
 prometheus-client = "0.23.1"
 gpsd-client-async = "2.0.0"
 pyserial-asyncio = "0.6"
+psutil = "7.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "9.0.2"

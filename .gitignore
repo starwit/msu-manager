@@ -10,3 +10,5 @@ dist
 .env
 env.sh
 .python-version
+.pybuild
+.pytest_cache

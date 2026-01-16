@@ -27,6 +27,10 @@ poetry run fastapi run msu_manager/main.py
 
 Application will serve frontend under: http://localhost:8000. If you run npm start in frontend folder, you let npm compile React code on the fly.
 
+## Run tests
+- Run all tests with `poetry run pytest -v`
+- Run modem tests (do not run by default, because they require attached hardware) with `poetry run pytest tests/test_modem_xyz`
+
 ## Usage
 
 Service is shipped as APT package, see [release](https://github.com/starwit/msu-manager/releases) page to download latest package. How to configure and use service see [manual](doc/MANUAL.md).
