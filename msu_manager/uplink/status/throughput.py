@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+from functools import partial
 
 import psutil
 from prometheus_client import Summary
@@ -40,4 +41,4 @@ class Throughput:
         return is_bytes_increased
     
     async def _get_counters(self) -> dict[str, snetio]:
-        return await asyncio.get_running_loop().run_in_executor(None, psutil.net_io_counters, pernic=True)
+        return await asyncio.get_running_loop().run_in_executor(None, partial(psutil.net_io_counters, pernic=True))
