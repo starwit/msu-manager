@@ -13,7 +13,7 @@ settings.yaml:
 	cp settings.template.yaml settings.yaml
 
 test: install
-	poetry run pytest
+	poetry run pytest -v
 
 set-version:
 	$(eval VERSION := $(shell poetry version -s))

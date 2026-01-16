@@ -27,6 +27,7 @@ jobs:
 
       - name: Install dependencies and run tests
         run: |
+          sudo apt update && sudo apt install -y iputils-ping
           poetry config cache-dir /root/.cache/pypoetry
           bash -c "make test"
 
