@@ -1,11 +1,5 @@
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
 import sys
 
 import pytest
@@ -16,7 +10,9 @@ from msu_manager.uplink.status import Ping
 
 
 @pytest.mark.asyncio
-async def test_tcl_ike41ve1_modem_reconnect(request):
+async def test_tcl_ike41ve1_modem_reconnect(request, caplog):
+    caplog.set_level(logging.DEBUG)
+    
     if 'tests/test_modem_tcl_ike41ve1.py' not in request.config.args:
         pytest.skip("Skipping TCL IKE41VE1 modem tests (specify tests/test_modem_tcl_ike41ve1.py explicitly to enable)")
     
