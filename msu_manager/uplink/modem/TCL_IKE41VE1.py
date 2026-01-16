@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import time
 from collections.abc import Iterable
 from typing import Any, Awaitable, Callable, Optional
 
@@ -13,28 +14,41 @@ logger = logging.getLogger(__name__)
 # Add configuration values for this one
 
 class TCL_IKE41VE1:
-    def __init__(self, ping: Ping, apn: str = "internet", wwan_iface: str = "wwan0"):
+    def __init__(self, ping: Ping, apn: str, wwan_iface: str, reboot_threshold_s: int):
         self._ping = ping
-        self._reboot_threshold_s = 300
+        self._reboot_threshold_s = reboot_threshold_s
+        self._first_fail_time = None
         self._apn = apn
         self._wwan_iface = wwan_iface
 
     async def reconnect(self) -> None:
+        success = await self._internal_reconnect()
+        if success:
+            logger.info('Connection successful')
+            self._first_fail_time = None
+        else:
+            if self._first_fail_time is None:
+                self._first_fail_time = time.time()
+                logger.warning('Connection not successful')
+            else:
+                time_since_first_fail = time.time() - self._first_fail_time
+                logger.warning(f'Connection has not been established since {round(time_since_first_fail, 2)}s')
+                if time_since_first_fail > self._reboot_threshold_s:
+                    logger.error(f'Reboot threshold reached. Rebooting...')
+                    await self._reboot()
+
+    async def _internal_reconnect(self) -> bool:
         try:
-            # Wait for modem hardware
             if not await self._wait_for_hardware():
-                logger.info('Failed to detect modem, trying to restart ModemManager')
+                logger.warning('Failed to detect modem, trying to restart ModemManager')
                 await self._restart_modemmanager()
                 if not await self._wait_for_hardware():
                     raise RuntimeError('Modem detection failed after ModemManager restart')
             
-            # Try simple connect first
             logger.info('Trying simple-connect')
             if await self._connect_bearer() and await self._set_up_network_interface() and await self._check_connection():
-                logger.info('Connection successful')
-                return
+                return True
             
-            # Simple connect failed, reset modem
             logger.info('Simple-connect failed, resetting modem')
             await self._reset_modem()
             
@@ -50,16 +64,17 @@ class TCL_IKE41VE1:
             
             # Try to connect again after reset
             if await self._connect_bearer() and await self._set_up_network_interface() and await self._check_connection():
-                logger.info('Connection successful after reset')
-                return
+                return True
             else:
-                logger.error('Connection finally failed')
                 await self._log_modem_status()
                 raise RuntimeError('Connection failed after reset')
                 
         except Exception:
             logger.warning(f'Failed to reconnect', exc_info=True)
-            raise
+            return False
+
+    async def _reboot(self) -> None:
+        await run_sudo_command(('shutdown', '-r', 'now'), log_cmd=True, log_err=True)
 
     async def _restart_modemmanager(self) -> None:
         logger.info('Restarting ModemManager.service')

@@ -19,7 +19,7 @@ async def test_tcl_ike41ve1_modem_reconnect(request, caplog):
         target='1.1.1.1',
         interface='wwan0',
     ))
-    modem = TCL_IKE41VE1(ping_instance)
+    modem = TCL_IKE41VE1(ping_instance, 'internet', 'wwan0', 300)
     await modem.reconnect()
 
     assert await ping_instance.check() == True

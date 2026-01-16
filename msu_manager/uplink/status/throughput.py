@@ -14,11 +14,9 @@ logger = logging.getLogger(__name__)
 
 class Throughput:
 
-    def __init__(self, interface: str, staleness_threshold_s: float):
+    def __init__(self, interface: str):
         self._interface = interface
         self._previous_bytes_received = 0
-        self._last_check_time = time.time()
-        self._staleness_threshold_s = staleness_threshold_s
         # Trigger check once s.t. we get a current counter value
         asyncio.create_task(self.check())
         
@@ -29,16 +27,11 @@ class Throughput:
         
         bytes_received = counters[self._interface].bytes_recv
         BYTES_RECEIVED_SUMMARY.observe(bytes_received)
-        is_bytes_increased = self._previous_bytes_received != bytes_received
+        # The counter may also be smaller in case the OS resets it to 0, so we're looking for any difference
+        is_counter_increased = self._previous_bytes_received != bytes_received
         self._previous_bytes_received = bytes_received
 
-        elapsed_time = time.time() - self._last_check_time
-        if elapsed_time > self._staleness_threshold_s:
-            logger.warning(f'Throughput has not been checked since {round(elapsed_time, 2)}s')
-
-        self._last_check_time = time.time()
-        
-        return is_bytes_increased
+        return is_counter_increased
     
     async def _get_counters(self) -> dict[str, snetio]:
         return await asyncio.get_running_loop().run_in_executor(None, partial(psutil.net_io_counters, pernic=True))

@@ -13,14 +13,15 @@ def test_full_config():
         },
         "uplink_monitor": {
             "enabled": true,
-            "restore_connection_cmd": ["echo", "Restoring connection"],
-            "wwan_device": "test_wwan",
+            "wwan_interface": "test_wwan",
             "wwan_apn": "test_apn",
-            "ping" : {
+            "check_interval_s": 10,
+            "ping": {
                 "target": "1.1.1.1"                                      
             },
-            "check_connection_device": "eth0",
-            "check_interval_s": 10
+            "modem": {
+                "type": "dummy"
+            }
         },
         "gps": {
             "enabled": true,
@@ -38,6 +39,25 @@ def test_full_config():
     assert CONFIG.uplink_monitor.check_interval_s == 10
     assert CONFIG.gps.gpsd_host == "some_host"
     assert CONFIG.frontend.path == "custom_dist"
+
+def test_modem_config_discriminator():
+    CONFIG = MsuManagerConfig.model_validate_json('''
+    {
+        "uplink_monitor": {
+            "enabled": true,
+            "wwan_interface": "test_wwan",
+            "wwan_apn": "test_apn",
+            "check_interval_s": 10,
+            "ping": {
+                "target": "1.1.1.1"                                      
+            },
+            "modem": {
+                "type": "dummy"
+            }
+        }
+    }
+    ''')
+    assert CONFIG.uplink_monitor.modem.type == "dummy"
 
 def test_explicit_feature_disable():
     CONFIG = MsuManagerConfig.model_validate_json('''

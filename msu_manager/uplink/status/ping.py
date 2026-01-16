@@ -24,14 +24,14 @@ class PingResult(NamedTuple):
 
 
 class Ping:
-    def __init__(self, config: PingConfig):
+    def __init__(self, config: PingConfig, interface: str = None):
         self._ping_cmd = [
             'ping',
             '-n',
             '-c', str(config.count),
             '-w', str(config.deadline_s),
             '-i', str(config.interval_s),
-            *(['-I', config.interface] if config.interface else []),
+            *(['-I', interface] if interface else []),
             config.target,
         ]
 

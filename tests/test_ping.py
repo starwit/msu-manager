@@ -125,11 +125,8 @@ async def test_run_non_existing_target(tmp_path):
 @pytest.mark.asyncio
 async def test_run_non_existing_interface(tmp_path):
     # This test will actually run the ping command through a non-existing interface
-    config = PingConfig(
-        target='127.0.0.1',
-        interface='DOES_NOT_EXIST',
-    )
-    ping_instance = Ping(config)
+    config = PingConfig(target='127.0.0.1')
+    ping_instance = Ping(config, interface='DOES_NOT_EXIST')
 
     result = await ping_instance.check()
 
