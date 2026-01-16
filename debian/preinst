@@ -10,9 +10,21 @@ usermod -aG dialout msumanager
 mkdir -p /etc/sudoers.d
 
 cat <<EOF >/etc/sudoers.d/msu-manager
-# Allow msumanager to run shutdown and pass environment variables to lte-connect.sh
-Defaults!/usr/bin/bash env_keep += "APN WWAN_IFACE"
-msumanager ALL= NOPASSWD: /usr/sbin/shutdown -h now, /usr/bin/bash /usr/bin/lte-connect.sh
+# Allow msumanager to run various commands without a password
+msumanager ALL= NOPASSWD: /usr/sbin/shutdown -h now
+
+msumanager ALL= NOPASSWD: /usr/bin/mmcli -S
+msumanager ALL= NOPASSWD: /usr/bin/mmcli ^-m [0-9]+ --enable$
+msumanager ALL= NOPASSWD: /usr/bin/mmcli ^-m [0-9]+ --simple-connect=[^[:space:]]+$
+
+msumanager ALL= NOPASSWD: /usr/sbin/ip ^addr flush dev [^[:space:]]+$
+msumanager ALL= NOPASSWD: /usr/sbin/ip ^addr add [^[:space:]]+ dev [^[:space:]]+$
+msumanager ALL= NOPASSWD: /usr/sbin/ip ^link set [^[:space:]]+ up$
+msumanager ALL= NOPASSWD: /usr/sbin/ip ^route add default via [^[:space:]]+ metric [0-9]+$
+
+msumanager ALL= NOPASSWD: /usr/bin/resolvectl ^dns .+$
+
+msumanager ALL= NOPASSWD: /usr/bin/systemctl ^(start|stop|restart) ModemManager.service$
 EOF
 
 chmod 440 /etc/sudoers.d/msu-manager
