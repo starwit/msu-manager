@@ -12,3 +12,9 @@ async def test_throughput_on_localhost():
     await localhost_ping.check()
 
     assert await testee.check() == True
+
+@pytest.mark.asyncio
+async def test_throughput_non_existing_if():
+    testee = Throughput(interface='DOES_NOT_EXIST', staleness_threshold_s=10)
+
+    assert await testee.check() == False
