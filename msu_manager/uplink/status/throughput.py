@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import time
 from functools import partial
 
 import psutil

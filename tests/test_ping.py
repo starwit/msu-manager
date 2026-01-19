@@ -101,9 +101,8 @@ async def test_run_localhost(tmp_path):
     # This test will actually run the ping command to localhost.
     config = PingConfig(
         target='127.0.0.1',
-        interface=None,
     )
-    ping_instance = Ping(config)
+    ping_instance = Ping(config, interface='lo')
 
     result = await ping_instance.check()
 
@@ -114,9 +113,8 @@ async def test_run_non_existing_target(tmp_path):
     # This test will actually run the ping command to a non-existing IP address
     config = PingConfig(
         target='198.51.100.123', # This is reserved, see https://en.wikipedia.org/wiki/Reserved_IP_addresses
-        interface=None,
     )
-    ping_instance = Ping(config)
+    ping_instance = Ping(config, interface='lo')
 
     result = await ping_instance.check()
 
