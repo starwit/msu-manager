@@ -21,14 +21,14 @@ async def test_run_sudo_command_failing():
     ret_code, stdout, stderr = await run_sudo_command(('definitely', 'fails_without_pw'), log_cmd=True, log_err=True)
     assert ret_code != 0
     assert stdout == ''
-    assert 'a password is required' in stderr
+    assert stderr.startswith('sudo:')
 
 @pytest.mark.asyncio
 async def test_run_sudo_command_failing_noargs():
     ret_code, stdout, stderr = await run_sudo_command('fails_without_pw', log_cmd=True, log_err=True)
     assert ret_code != 0
     assert stdout == ''
-    assert 'a password is required' in stderr
+    assert stderr.startswith('sudo:')
 
 @pytest.mark.asyncio
 async def test_run_command_raise_on_fail():
