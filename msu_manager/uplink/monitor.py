@@ -27,6 +27,7 @@ class UplinkMonitor:
                 ping=self._ping,
                 apn=self._config.wwan_apn,
                 wwan_iface=self._config.wwan_interface,
+                reboot_enabled=self._config.modem.reboot_enabled,
                 reboot_threshold_s=self._config.modem.reboot_threshold_s,
             )
 

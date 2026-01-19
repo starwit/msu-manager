@@ -9,14 +9,15 @@ uplink_monitor:
   enabled: true
   wwan_interface: 'wwan0'                                                           # WWAN interface name (see mmcli -m any and check System.ports, it's probably wwan0)
   wwan_apn: 'test.apn'                                                              # APN to use for the WWAN connection
-  check_interval_s: 10
-  ping:
+  check_interval_s: 10                                                              # How often to trigger the connection check
+  ping:                                                                             # ping configuration (see config.py for more options)
     target: '1.1.1.1'                                                               # Target to ping for connection checks
   modem:
-    type: 'dummy'                                                                   # Choose the modem implementation
+    type: 'dummy'                                                                   # Choose the modem implementation (dummy does nothing)
   # modem:
     # type: 'tcl_ike41ve1'
-    # reboot_threshold_s: 300                                                       # If connection could not be reestablished after some time, reboot the system as a last resort measure
+    # reboot_enabled: false                                                         # Enable rebooting the machine as a last resort measure if the modem repeatedly cannot be detected
+    # reboot_threshold_s: 300                                                       # How long after first failed connection until reboot is triggered
 gps:
   enabled: true
   init_cmd: ['true']                                                                # Optional command to initialize GPS, e.g. set measurement rate ['ubxtool', '-p', 'CFG-RATE,200']

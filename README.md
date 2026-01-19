@@ -70,5 +70,14 @@ curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"ty
 
 ## Changelog
 
+### 3.0.0
+- Major overhaul of uplink_monitor skill
+  - Breaking changes in uplink_monitor configuration (consult the [settings template](./settings.template.yaml)
+  - Connection check now first consults uplink interface byte counters and only attempts a ping if no traffic was recorded (this should help in scenarios with a saturated uplink, where ICMP might get lost)
+- Improved TCL IKE41VE1 integration
+  - Implement reconnection logic in Python (as part of the app for better control)
+  - Add a reboot feature as a last resort (if modem cannot be detected at all)
+- APT: Due to above changes, more fine grained sudo rules are needed (this should be updated automatically during installation)
+
 ### 2.0.1
 - APT: Fix msumanager user lacking permissions to access serial devices

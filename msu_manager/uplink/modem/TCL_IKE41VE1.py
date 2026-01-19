@@ -14,26 +14,28 @@ logger = logging.getLogger(__name__)
 # Add configuration values for this one
 
 class TCL_IKE41VE1:
-    def __init__(self, ping: Ping, apn: str, wwan_iface: str, reboot_threshold_s: int):
+    def __init__(self, ping: Ping, apn: str, wwan_iface: str, reboot_enabled: bool, reboot_threshold_s: int):
         self._ping = ping
+        self._reboot_enabled = reboot_enabled
         self._reboot_threshold_s = reboot_threshold_s
         self._first_fail_time = None
         self._apn = apn
         self._wwan_iface = wwan_iface
 
     async def reconnect(self) -> None:
+        start_time = time.time()
         success = await self._internal_reconnect()
         if success:
-            logger.info('Connection successful')
+            logger.info(f'Connection successful after {round(time.time() - start_time, 2)}s')
             self._first_fail_time = None
         else:
             if self._first_fail_time is None:
                 self._first_fail_time = time.time()
-                logger.warning('Connection not successful')
+                logger.warning(f'Connection not successful after {round(time.time() - start_time, 2)}s')
             else:
                 time_since_first_fail = time.time() - self._first_fail_time
                 logger.warning(f'Connection has not been established since {round(time_since_first_fail, 2)}s')
-                if time_since_first_fail > self._reboot_threshold_s:
+                if self._reboot_enabled and time_since_first_fail > self._reboot_threshold_s:
                     logger.error(f'Reboot threshold reached. Rebooting...')
                     await self._reboot()
 

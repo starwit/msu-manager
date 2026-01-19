@@ -34,6 +34,7 @@ class DummyModemConfig(BaseModel):
 
 class TCL_IKE41VE1_ModemConfig(BaseModel):
     type: Literal[ModemType.TCL_IKE41VE1] = ModemType.TCL_IKE41VE1
+    reboot_enabled: bool = False
     reboot_threshold_s: float = 300
     
 
