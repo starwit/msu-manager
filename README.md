@@ -27,6 +27,10 @@ poetry run fastapi run msu_manager/main.py
 
 Application will serve frontend under: http://localhost:8000. If you run npm start in frontend folder, you let npm compile React code on the fly.
 
+## Run tests
+- Run all tests with `poetry run pytest -v`
+- Run modem tests (do not run by default, because they require attached hardware) with `poetry run pytest tests/test_modem_xyz`
+
 ## Usage
 
 Service is shipped as APT package, see [release](https://github.com/starwit/msu-manager/releases) page to download latest package. How to configure and use service see [manual](doc/MANUAL.md).
@@ -65,6 +69,15 @@ curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"ty
 ```
 
 ## Changelog
+
+### 3.0.0
+- Major overhaul of uplink_monitor skill
+  - Breaking changes in uplink_monitor configuration (consult the [settings template](./settings.template.yaml)
+  - Connection check now first consults uplink interface byte counters and only attempts a ping if no traffic was recorded (this should help in scenarios with a saturated uplink, where ICMP might get lost)
+- Improved TCL IKE41VE1 integration
+  - Implement reconnection logic in Python (as part of the app for better control)
+  - Add a reboot feature as a last resort (if modem cannot be detected at all)
+- APT: Due to above changes, more fine grained sudo rules are needed (this should be updated automatically during installation)
 
 ### 2.0.1
 - APT: Fix msumanager user lacking permissions to access serial devices

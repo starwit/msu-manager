@@ -5,5 +5,3 @@ msu_manager /opt/msu-manager
 frontend/dist /opt/msu-manager
 
 debian/msu-manager.service /usr/lib/systemd/system/
-
-debian/lte/lte-connect.sh /usr/bin/

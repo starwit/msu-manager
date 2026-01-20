@@ -24,7 +24,6 @@ source .venv/bin/activate
 fastapi run msu_manager/main.py "\$@"
 cd $current_dir
 EOF
-    chmod +x /usr/bin/lte-connect.sh
     chmod +x /usr/local/bin/$SERVICE_NAME    
 
     # link settings file from etc

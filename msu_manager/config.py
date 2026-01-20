@@ -16,14 +16,35 @@ class LogLevel(str, Enum):
     DEBUG = 'DEBUG'
 
 
+class ModemType(str, Enum):
+    DUMMY = 'dummy'
+    TCL_IKE41VE1 = 'tcl_ike41ve1'
+
+
+class PingConfig(BaseModel):
+    target: str
+    count: int = 3
+    deadline_s: int = 1
+    interval_s: float = 0.2
+
+
+class DummyModemConfig(BaseModel):
+    type: Literal[ModemType.DUMMY] = ModemType.DUMMY
+
+
+class TCL_IKE41VE1_ModemConfig(BaseModel):
+    type: Literal[ModemType.TCL_IKE41VE1] = ModemType.TCL_IKE41VE1
+    reboot_enabled: bool = False
+    reboot_threshold_s: float = 300
+    
+
 class UplinkMonitorConfig(BaseModel):
     enabled: Literal[True]
-    restore_connection_cmd: List[str]
-    wwan_device: str
+    wwan_interface: str
     wwan_apn: str
-    check_connection_target: str
-    check_connection_device: str = None
-    check_interval_s: int = 10
+    check_interval_s: float = 10
+    ping: PingConfig
+    modem: DummyModemConfig | TCL_IKE41VE1_ModemConfig = Field(discriminator='type', default=DummyModemConfig())
 
 
 class UplinkMonitorConfigDisabled(BaseModel):
