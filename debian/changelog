@@ -1,3 +1,9 @@
+msu-manager (3.0.1) unstable; urgency=medium
+
+  *  --author Build Bot <foss@starwit.de>
+
+ -- Markus Zarbock <foss@starwit.de>  Wed, 21 Jan 2026 10:30:40 +0000
+
 msu-manager (3.0.0) unstable; urgency=medium
 
   *  --author Build Bot <foss@starwit.de>
