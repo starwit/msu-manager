@@ -59,11 +59,11 @@ class GpsMonitor:
 
     @property
     def position(self):
-        if self._latest_tpv_msg is None:
+        if self._latest_tpv_msg is None or self._latest_tpv_msg.mode not in (Mode.fix2D, Mode.fix3D):
             return Position(lat=0, lon=0, fix=False)
         
         return Position(
             lat=self._latest_tpv_msg.lat,
             lon=self._latest_tpv_msg.lon,
-            fix=self._latest_tpv_msg.mode in (Mode.fix2D, Mode.fix3D),
+            fix=True,
         )

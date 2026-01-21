@@ -70,6 +70,9 @@ curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"ty
 
 ## Changelog
 
+### 3.0.1
+- Fix exception in /api/gps/position endpoint if no GPS fix exists
+
 ### 3.0.0
 - Major overhaul of uplink_monitor skill
   - Breaking changes in uplink_monitor configuration (consult the [settings template](./settings.template.yaml)
