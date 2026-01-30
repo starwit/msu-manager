@@ -55,6 +55,9 @@ class UplinkMonitor:
             logger.error(f"Unexpected error occurred in UplinkMonitor", exc_info=True)
 
     async def _check_connection(self) -> bool:
-        result = await self._throughput.check() or await self._ping.check()
+        result = (throughput_ok := await self._throughput.check()) or (ping_ok := await self._ping.check())
+        if not result:
+            logger.info(f'Connection check failed (throughput_ok={throughput_ok}, ping_ok={ping_ok})')
+
         self._is_up = result
         return result
