@@ -70,6 +70,9 @@ curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"ty
 
 ## Changelog
 
+### 3.0.2
+- Improve connection check logging
+
 ### 3.0.1
 - Fix exception in /api/gps/position endpoint if no GPS fix exists
 
