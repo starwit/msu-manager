@@ -70,6 +70,9 @@ curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"ty
 
 ## Changelog
 
+### 3.0.3
+- Fix `uplink_bytes_received` metric to use a gauge (this was a summary before, which is semantically wrong)
+
 ### 3.0.2
 - Improve connection check logging
 
