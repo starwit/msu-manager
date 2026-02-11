@@ -3,10 +3,10 @@ import logging
 from functools import partial
 
 import psutil
-from prometheus_client import Summary
+from prometheus_client import Gauge
 from psutil._ntuples import snetio
 
-BYTES_RECEIVED_SUMMARY = Summary('uplink_bytes_received', 'Bytes received on given network interface')
+BYTES_RECEIVED_GAUGE = Gauge('uplink_bytes_received', 'Bytes received on configured uplink network interface')
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class Throughput:
             return False
         
         bytes_received = counters[self._interface].bytes_recv
-        BYTES_RECEIVED_SUMMARY.observe(bytes_received)
+        BYTES_RECEIVED_GAUGE.set(bytes_received)
         # The counter may also be smaller in case the OS resets it to 0, so we're looking for any difference
         is_counter_increased = self._previous_bytes_received != bytes_received
         self._previous_bytes_received = bytes_received
