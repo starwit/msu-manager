@@ -45,3 +45,22 @@ class HcuSkill:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='HcuController is disabled')
 
             await self._hcu_controller.process_message(message)
+
+        @router.get('/shutdown/inhibit/{seconds}', status_code=status.HTTP_204_NO_CONTENT, responses={409: {'description': 'The inhibition time exceeded the maximum value'}})
+        async def shutdown_inhibit_endpoint(seconds: int):
+            if seconds > self._config.shutdown_inhibit_max_s:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Inhibition time exceeds maximum of {self._config.shutdown_inhibit_max_s}s')
+            
+            logger.info(f'Inhibiting shutdown for {seconds}s per user request')
+            success = await self._hcu_controller.inhibit_shutdown(seconds)
+
+            if not success:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f'No shutdown scheduled')
+
+        @router.get('/shutdown/remaining')
+        async def shutdown_remaining_endpoint():
+            remaining_time = self._hcu_controller.remaining_shutdown_time
+            if remaining_time is None:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f'No shutdown scheduled')
+            
+            return remaining_time

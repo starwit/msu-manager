@@ -18,9 +18,12 @@ IGNITION_STATE_ENUM = Enum('hcu_ignition_state', 'Ignition state of the vehicle 
 
 class HcuController:
     def __init__(self, shutdown_command: List[str], shutdown_delay_s: int):
-        self.shutdown_command = shutdown_command
-        self.shutdown_delay_s = shutdown_delay_s
+        self._shutdown_command = shutdown_command
+        self._shutdown_delay_s = shutdown_delay_s
+        self._shutdown_delay_s_override = None
         self._shutdown_task = None
+        self._shutdown_task_execution_ts = None
+        self._shutdown_inhibition_end = 0
         self._last_heartbeat_time = time.time()
         IGNITION_STATE_ENUM.state('unknown')
 
@@ -37,6 +40,24 @@ class HcuController:
                 self._handle_log(message)
             case MetricMessage():
                 self._handle_metric(message)
+
+    async def inhibit_shutdown(self, seconds: int):
+        self._shutdown_inhibition_end = time.time() + seconds
+        
+        if self.is_shutdown_scheduled:
+            await self._cancel_shutdown()
+            await self._schedule_shutdown(seconds)
+
+    @property
+    def is_shutdown_scheduled(self) -> bool:
+        return self._shutdown_task is not None
+
+    @property
+    def remaining_shutdown_time(self) -> float | None:
+        if self._shutdown_task_execution_ts is not None:
+            return self._shutdown_task_execution_ts - time.time()
+        else:
+            return None
                 
     async def handle_shutdown(self):
         IGNITION_STATE_ENUM.state('off')
@@ -44,9 +65,20 @@ class HcuController:
         if self._shutdown_task is not None:
             logger.warning('Shutdown already scheduled, ignoring duplicate request.')
             return
+
+        await self._schedule_shutdown(self._shutdown_delay_s)
         
-        logger.info(f'Scheduling shutdown in {self.shutdown_delay_s} seconds.')
-        self._shutdown_task = asyncio.create_task(self._delayed_shutdown())
+    async def _schedule_shutdown(self, delay_s: int):
+        logger.info(f'Scheduling shutdown in {delay_s} seconds.')
+
+        effective_delay = delay_s
+        current_time = time.time()
+        if self._shutdown_inhibition_end > current_time:
+            effective_delay = self._shutdown_inhibition_end - current_time
+            logger.info(f'Shutdown delay changed to {round(effective_delay, 2)}s due to inhibition.')
+            
+        self._shutdown_task = asyncio.create_task(self._delayed_shutdown(effective_delay))
+        self._shutdown_task_execution_ts = time.time() + effective_delay
 
     async def handle_resume(self):
         IGNITION_STATE_ENUM.state('on')
@@ -68,12 +100,13 @@ class HcuController:
                 # Task cancellation is expected here as we've called cancel()
                 pass
             self._shutdown_task = None
+            self._shutdown_task_execution_ts = None
         
-    async def _delayed_shutdown(self):
-        await asyncio.sleep(self.shutdown_delay_s)
+    async def _delayed_shutdown(self, delay_s: int):
+        await asyncio.sleep(delay_s)
         
         logger.info('Executing shutdown now.')
-        retcode, stdout, stderr = await run_command(self.shutdown_command)
+        retcode, stdout, stderr = await run_command(self._shutdown_command)
 
         # This is probably never reached if shutdown is successful
         if retcode != 0:
