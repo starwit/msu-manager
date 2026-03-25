@@ -32,7 +32,6 @@ async def test_shutdown_inhibit_ongoing(test_client, tmp_shutdown_file, write_se
     await asyncio.sleep(1)
     assert tmp_shutdown_file.exists()
 
-
 @pytest.mark.asyncio
 async def test_shutdown_inhibit_remaining_api(test_client, write_serial_input):
     await write_serial_input(b'{"type":"SHUTDOWN"}\n')
@@ -49,4 +48,3 @@ async def test_shutdown_inhibit_remaining_api(test_client, write_serial_input):
     print(response.content)
     assert response.status_code == 200
     assert abs(float(response.content) - 2) < 0.1
-
