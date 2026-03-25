@@ -14,7 +14,7 @@ def tmp_shutdown_file(tmp_path) -> Path:
     return tmp_path / 'shutdown_executed'
 
 @pytest.fixture
-def default_testee(tmp_shutdown_file, serial_device_path_mock):
+def default_hcu_skill(tmp_shutdown_file, serial_device_path_mock):
     return HcuSkill(HcuControllerConfig(
         enabled=True,
         serial_device=serial_device_path_mock,
@@ -31,14 +31,19 @@ async def write_serial_input(unused_tcp_port):
         nonlocal dummy_writer
         dummy_writer = writer
     
-    await asyncio.start_server(connect_cb, '127.0.0.1', unused_tcp_port)
+    server = await asyncio.start_server(connect_cb, '127.0.0.1', unused_tcp_port)
 
     async def writer(data: bytes):
         assert dummy_writer is not None, 'You need to make sure the serial connection is established before calling write_serial_input()'
         dummy_writer.write(data)
         await dummy_writer.drain()
 
-    return writer
+    yield writer
+
+    dummy_writer.close()
+    await dummy_writer.wait_closed()
+    server.close()
+    await server.wait_closed()
 
 @pytest.fixture
 def serial_device_path_mock(unused_tcp_port):
