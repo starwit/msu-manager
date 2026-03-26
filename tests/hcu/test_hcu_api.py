@@ -33,18 +33,18 @@ async def test_shutdown_inhibit_ongoing(test_client, tmp_shutdown_file, write_se
     assert tmp_shutdown_file.exists()
 
 @pytest.mark.asyncio
-async def test_shutdown_inhibit_remaining_api(test_client, write_serial_input):
+async def test_shutdown_inhibit_status_api(test_client, write_serial_input):
     await write_serial_input(b'{"type":"SHUTDOWN"}\n')
     await asyncio.sleep(0.01)
 
-    response = await test_client.get('/shutdown/remaining')
-    print(response.content)
+    response = await test_client.get('/shutdown/status')
     assert response.status_code == 200
-    assert abs(float(response.content) - 1) < 0.1
+    assert abs(float(response.json()['remaining_runtime_s']) - 1) < 0.1
+    assert bool(response.json()['shutdown_in_progress']) == True
 
     await test_client.get('/shutdown/inhibit/2')
 
-    response = await test_client.get('/shutdown/remaining')
-    print(response.content)
+    response = await test_client.get('/shutdown/status')
     assert response.status_code == 200
-    assert abs(float(response.content) - 2) < 0.1
+    assert abs(float(response.json()['remaining_runtime_s']) - 2) < 0.1
+    assert bool(response.json()['shutdown_in_progress']) == True
