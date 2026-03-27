@@ -27,7 +27,8 @@ async def make_hcu_skill(serial_device_path_mock, write_serial_input):
     
     yield factory
 
-    await skill.close()
+    if skill is not None:
+        await skill.close()
 
 
 @pytest.mark.asyncio

@@ -21,7 +21,6 @@ class HcuController:
     def __init__(self, shutdown_command: List[str], shutdown_delay_s: int):
         self._shutdown_command = shutdown_command
         self._shutdown_task = None
-        self._shutdown_task_execution_ts = None
         self._shutdown_model = ShutdownModel(shutdown_delay_s)
         self._last_heartbeat_time = time.time()
         IGNITION_STATE_ENUM.state('unknown')
@@ -78,7 +77,6 @@ class HcuController:
             logger.info(f'Scheduling shutdown in {self._shutdown_model.static_delay} seconds.')
             
         self._shutdown_task = asyncio.create_task(self._delayed_shutdown(time_remaining))
-        self._shutdown_task_execution_ts = time.time() + time_remaining
 
     async def handle_resume(self):
         IGNITION_STATE_ENUM.state('on')
@@ -100,7 +98,6 @@ class HcuController:
                 # Task cancellation is expected here as we've called cancel()
                 pass
             self._shutdown_task = None
-            self._shutdown_task_execution_ts = None
             self._shutdown_model.stop()
         
     async def _delayed_shutdown(self, delay_s: int):
@@ -114,11 +111,9 @@ class HcuController:
             logger.error(f'Shutdown command failed with exit code {retcode}')
             logger.error(f'[stdout]\n{stdout}')
             logger.error(f'[stderr]\n{stderr}')
-            await self._cancel_shutdown()
 
         # Cleanup
         self._shutdown_task = None
-        self._shutdown_task_execution_ts = None
         self._shutdown_model.stop()
 
     def _handle_heartbeat(self):

@@ -40,8 +40,10 @@ async def write_serial_input(unused_tcp_port):
 
     yield writer
 
-    dummy_writer.close()
-    await dummy_writer.wait_closed()
+    if dummy_writer is not None:
+        dummy_writer.close()
+        await dummy_writer.wait_closed()
+    
     server.close()
     await server.wait_closed()
 

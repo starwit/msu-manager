@@ -46,10 +46,13 @@ class HcuSkill:
 
             await self._hcu_controller.process_message(message)
 
-        @router.get('/shutdown/inhibit/{seconds}', status_code=status.HTTP_204_NO_CONTENT, responses={
-            400: {'description': 'The inhibition time exceeded the maximum value'}
+        @router.put('/shutdown/inhibit/{seconds}', status_code=status.HTTP_204_NO_CONTENT, responses={
+            400: {'description': 'The inhibition time is invalid (either negative or exceeded the maximum value)'}
         })
         async def shutdown_inhibit_endpoint(seconds: int):
+            if seconds < 0:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Inhibition time cannot be negative')
+            
             if seconds > self._config.shutdown_inhibit_max_s:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Inhibition time exceeds maximum of {self._config.shutdown_inhibit_max_s}s')
             
