@@ -70,6 +70,12 @@ curl localhost:8000/api/hcu/message -H "Content-Type: application/json" -d '{"ty
 
 ## Changelog
 
+### 3.1.0
+- Add HCU HTTP endpoints 
+  - Inhibit HCU-triggered shutdown (PUT `/api/hcu/shutdown/inhibit/SECONDS`)
+  - Show shutdown status (GET `/api/hcu/shutdown/status`)
+- Add config option to limit max inhibition time (optional, no config changes needed)
+
 ### 3.0.3
 - Fix `uplink_bytes_received` metric to use a gauge (this was a summary before, which is semantically wrong)
 
