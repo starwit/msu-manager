@@ -57,6 +57,7 @@ class HcuControllerConfig(BaseModel):
     serial_baud_rate: int
     shutdown_delay_s: int = 180
     shutdown_command: List[str]
+    shutdown_inhibit_max_s: int = 1800
 
 
 class HcuControllerConfigDisabled(BaseModel):

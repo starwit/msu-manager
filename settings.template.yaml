@@ -5,6 +5,7 @@ hcu_controller:
   serial_baud_rate: 115200
   shutdown_delay_s: 180                                                             # Delay after having received SHUTDOWN command to executing shutdown (in seconds)
   shutdown_command: ['sudo', 'shutdown', '-h', 'now']                               # Don't accidentally shut down your computer and use a dummy command like "touch /tmp/shutdown_called" for testing
+  shutdown_inhibit_max_s: 1800                                                      # Maximum time that shutdown can be inhibited through HTTP API at a time
 uplink_monitor:
   enabled: true
   wwan_interface: 'wwan0'                                                           # WWAN interface name (see mmcli -m any and check System.ports, it's probably wwan0)
